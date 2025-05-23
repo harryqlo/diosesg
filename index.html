@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dioses Griegos: IA para Texto, Imágenes Personalizadas</title>
+    <title>Dioses Griegos: Imágenes Locales y Texto con IA</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Chewy&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
@@ -104,15 +104,16 @@
         
         #learning-section, #quiz-god-selection-section, #quiz-section, #next-question-button, #endGameModal, #geminiChatModal, #geminiMythModal, #geminiAdviceModal { display: none; }
         
-        .animated-image { animation: pulse-grow 2s infinite ease-in-out; } 
-        @keyframes pulse-grow { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.03); } } 
+        /* .animated-image { animation: pulse-grow 2s infinite ease-in-out; } 
+        @keyframes pulse-grow { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.03); } }  */
+        /* Animación pulse-grow puede quitarse si no se usan GIFs animados */
         
         .god-motto { font-style: italic; color: #2563EB; margin-top: 0.5rem; margin-bottom: 0.75rem; font-size: 1.2rem; sm:font-size: 1.3rem; }
         #god-learn-description { 
             font-family: 'Inter', sans-serif;
             text-align: left; line-height: 1.7; font-size: 1rem; sm:font-size: 1.1rem; color: #1F2937; 
         }
-        .loading-indicator { 
+        .loading-indicator { /* Solo para cargas de texto de Gemini ahora */
             display: inline-block; border: 3px solid #E5E7EB; 
             border-top: 3px solid #FBBF24; 
             border-radius: 50%; width: 20px; height: 20px;
@@ -157,7 +158,7 @@
             <div id="god-learn-image-container" class="learning-image-container my-4 h-auto flex items-center justify-center"> 
             </div>
             <p id="god-learn-motto" class="font-chewy god-motto"></p>
-            <p id="god-learn-description" class="min-h-[8em] mb-6"></p> {/* Aumentado min-h para más texto */}
+            <p id="god-learn-description" class="min-h-[8em] mb-6"></p> 
             
             <div class="my-4 sm:my-6 p-3 sm:p-4 bg-sky-50 rounded-lg shadow-inner">
                 <h3 class="font-chewy title-subsection text-sky-700 mb-3">¡Interactúa con <span id="gemini-interaction-god-name">este Dios</span>!</h3>
@@ -342,83 +343,83 @@
         const godsData = [
             { 
                 id: "zeus", name: "Zeus", motto: "¡El cielo y el trueno me obedecen!",
-                description: "Soy Zeus, el rey de todos los dioses olímpicos y el dios supremo del cielo, los truenos y los relámpagos. Mi hogar es el Monte Olimpo. Mi arma más poderosa es el rayo, que lanzo cuando estoy enfadado o para impartir justicia. Mis símbolos son el águila, el roble y el cetro real. Soy hijo de los titanes Cronos y Rea, y tuve que luchar contra mi padre para liberar a mis hermanos: Hera (que también es mi esposa), Poseidón, Hades, Hestia y Deméter. Juntos vencimos a los Titanes en una gran guerra llamada Titanomaquia. Aunque estoy casado con Hera, he tenido muchas aventuras y muchos hijos famosos como Hércules, Atenea (que nació de mi cabeza), Apolo y Artemisa. Soy conocido por ser un líder fuerte, a veces severo, pero también justo.",
-                quizQuestion: "¿Cuál es mi arma principal y símbolo de mi poder como rey de los dioses?",
+                description: "Soy Zeus, el rey de todos los dioses olímpicos y el dios supremo del cielo, los truenos y los relámpagos. Mi hogar es el Monte Olimpo. Mi arma más poderosa es el rayo, que lanzo cuando estoy enfadado o para impartir justicia. Mis símbolos son el águila, el roble y el cetro real. Soy hijo de los titanes Cronos y Rea, y tuve que luchar contra mi padre para liberar a mis hermanos: Hera (que también es mi esposa), Poseidón, Hades, Hestia y Deméter. Juntos vencimos a los Titanes en una gran guerra llamada Titanomaquia. Aunque estoy casado con Hera, he tenido muchas aventuras y muchos hijos famosos como Hércules, Atenea (que nació de mi cabeza), Apolo y Artemisa. Soy conocido por ser un líder fuerte, a veces severo, pero también justo. En Roma me conocen como Júpiter.",
+                quizQuestion: "¿Cuál es mi equivalente romano, también conocido como el padre de los dioses?",
                 image: "https://photos.fife.usercontent.google.com/pw/AP1GczN-bPW9urrYIQEK8GdGtVsGPtj4pe8rjexu5rliFPHC9d-2ocK_QxXg8w=w616-h616-s-no?authuser=0", 
                 symbolImage: "https://placehold.co/150x150/FFEB3B/000000?text=Rayo", 
-                hint: "Está relacionado con las tormentas."
+                hint: "Su nombre empieza con J."
             },
             { 
                 id: "hera", name: "Hera", motto: "Reina del Olimpo, guardiana del hogar.",
-                description: "Soy Hera, la majestuosa reina de los dioses, hermana y esposa de Zeus. Soy la diosa del matrimonio, las mujeres, el parto y la familia. Mi animal sagrado es el pavo real, cuyas plumas tienen 'ojos' en honor a Argos, mi fiel gigante de cien ojos. También me representan la granada (símbolo de fertilidad) y la diadema real. Soy muy poderosa y a veces me muestro celosa por las infidelidades de Zeus, castigando a sus amantes y a sus hijos. Mi equivalente romana es Juno. Soy madre de Ares, Hefesto, Hebe e Ilitía.",
-                quizQuestion: "¿Qué animal con una cola llena de 'ojos' es mi símbolo sagrado?",
+                description: "Soy Hera, la majestuosa reina de los dioses, hermana y esposa de Zeus. Soy la diosa del matrimonio, las mujeres, el parto y la familia. Mi animal sagrado es el pavo real, cuyas plumas tienen 'ojos' en honor a Argos, mi fiel gigante de cien ojos. También me representan la granada (símbolo de fertilidad) y la diadema real. Soy muy poderosa y a veces me muestro celosa por las infidelidades de Zeus, castigando a sus amantes y a sus hijos. Mi equivalente romana es Juno. Soy madre de Ares (dios de la guerra) y Hefesto (dios del fuego y la forja).",
+                quizQuestion: "Soy la protectora del matrimonio. ¿Cuál es mi nombre romano?",
                 image: "https://photos.fife.usercontent.google.com/pw/AP1GczM29nd6xm7i8QT6E4q7J9jA_dR46XbIM2OGdnDk1ce3umIS8okrkOz_3Q=w616-h616-s-no?authuser=0", 
                 symbolImage: "https://placehold.co/150x150/32CD32/FFFFFF?text=Pavo+Real", 
-                hint: "Es un ave muy elegante y colorida."
+                hint: "Suena parecido a un mes del año."
             },
             { 
                 id: "poseidon", name: "Poseidón", motto: "¡Las olas tiemblan ante mi tridente!",
-                description: "Soy Poseidón, uno de los tres grandes dioses junto a mis hermanos Zeus (cielo) y Hades (inframundo). ¡Yo gobierno los mares, los océanos y los ríos! También soy el dios de los terremotos, por eso me llaman 'El que sacude la tierra', y de los caballos, ¡incluso dicen que creé el primer caballo! Mi símbolo más conocido es el tridente, un arpón de tres puntas con el que puedo agitar las aguas, crear tormentas o calmar el mar. Mi palacio está en las profundidades del océano. Los delfines y los toros también son sagrados para mí. Mi equivalente romano es Neptuno.",
-                quizQuestion: "Además de los mares, ¿de qué animales soy el dios creador y protector?",
+                description: "Soy Poseidón, uno de los tres grandes dioses junto a mis hermanos Zeus (cielo) y Hades (inframundo). ¡Yo gobierno los mares, los océanos y los ríos! También soy el dios de los terremotos, por eso me llaman 'El que sacude la tierra', y de los caballos, ¡incluso dicen que creé el primer caballo! Mi símbolo más conocido es el tridente, un arpón de tres puntas con el que puedo agitar las aguas, crear tormentas o calmar el mar. Mi palacio está en las profundidades del océano. Los delfines y los toros también son sagrados para mí. En Roma, me conocen como Neptuno.",
+                quizQuestion: "Si los romanos me conocían como Neptuno, ¿qué planeta del sistema solar lleva mi nombre romano?",
                 image: "https://photos.fife.usercontent.google.com/pw/AP1GczM4YobrpdQu_U0jlMOUHfu3ay0PXpQ4kaj0iEx9fBBie3lx0iGbGvI96Q=w616-h616-s-no?authuser=0", 
                 symbolImage: "https://placehold.co/150x150/4682B4/FFFFFF?text=Tridente", 
-                hint: "Son rápidos y nobles."
+                hint: "Es un planeta azul y gaseoso."
             },
             { 
                 id: "atenea", name: "Atenea", motto: "Sabiduría y estrategia, mi estandarte.",
-                description: "Soy Atenea, diosa de la sabiduría, la estrategia en la guerra (la guerra justa e inteligente, no la brutalidad), las artes, la artesanía, la justicia y la civilización. Nací de una forma asombrosa: ¡directamente de la cabeza de mi padre, Zeus, ya adulta y con armadura completa! Soy una guerrera virgen y una gran estratega, por eso ayudé a muchos héroes como Odiseo y Perseo. Mis símbolos son la lechuza (que representa la sabiduría) y el olivo (símbolo de paz y prosperidad), que regalé a la ciudad de Atenas, de la cual soy patrona. El Partenón en Atenas es mi templo más famoso. Mi equivalente romana es Minerva.",
-                quizQuestion: "¿De qué parte del cuerpo de Zeus nací, ya adulta y con armadura?",
+                description: "Soy Atenea, diosa de la sabiduría, la inteligencia, las artes, la artesanía, la estrategia en la guerra (la guerra justa e inteligente, no la brutalidad) y la justicia. ¡Nací de una forma asombrosa: directamente de la cabeza de mi padre, Zeus, ya adulta y con armadura completa! Soy una guerrera virgen y una gran estratega, por eso ayudé a muchos héroes como Odiseo y Perseo. Mis símbolos son la lechuza (que representa la sabiduría) y el olivo (símbolo de paz y prosperidad), que regalé a la ciudad de Atenas, de la cual soy patrona. El Partenón en Atenas es mi templo más famoso. Mi equivalente romana es Minerva.",
+                quizQuestion: "Soy la diosa patrona de una famosa ciudad griega que lleva mi nombre. ¿Cuál es?",
                 image: "https://photos.fife.usercontent.google.com/pw/AP1GczM5pjVvCEH04PiRrz6p5n7qwfofs_9QELZfXSR2cdfHgAtzTwTbDi4MlQ=w616-h616-s-no?authuser=0", 
                 symbolImage: "https://placehold.co/150x150/A9A9A9/FFFFFF?text=Lechuza", 
-                hint: "Está relacionado con el pensamiento y la inteligencia."
+                hint: "Es la capital de Grecia."
             },
             { 
                 id: "apolo", name: "Apolo", motto: "Luz, música y arte, mi divina inspiración.",
-                description: "Soy Apolo, dios de muchas cosas: el sol y la luz, la música y la poesía, la verdad y la profecía, la medicina y la curación, el tiro con arco... ¡Soy un dios muy talentoso y radiante! Toco la lira de oro, un instrumento que inventó mi hermano Hermes. Soy un arquero infalible con flechas de oro o plata. Mi oráculo más famoso estaba en Delfos, donde la gente iba a conocer su futuro. Soy hijo de Zeus y Leto, y mi hermana gemela es Artemisa. A veces se me asocia con el dios sol Helios. ",
-                quizQuestion: "¿Qué instrumento musical de cuerda es mi símbolo más famoso?",
+                description: "Soy Apolo, dios de muchas cosas: el sol y la luz (aunque a veces se me confunde con Helios), la música y la poesía, la verdad y la profecía, la medicina y la curación, y el tiro con arco. ¡Soy un dios muy talentoso y radiante! Toco la lira de oro, un instrumento que inventó mi hermano Hermes. Soy un arquero infalible con flechas de oro o plata, que pueden traer tanto plagas como curación. Mi oráculo más famoso estaba en Delfos, donde la sacerdotisa Pitia transmitía mis profecías. Soy hijo de Zeus y Leto, y mi hermana gemela es Artemisa. Los romanos también me llamaban Apolo.",
+                quizQuestion: "¿En qué famosa ciudad se encontraba mi oráculo más importante, donde la gente iba a conocer su futuro?",
                 image: "https://photos.fife.usercontent.google.com/pw/AP1GczNv1JOM5eNzVpqunHEh0T6sNE-fnQLYTF-IZsMjTUGRYWrkqQl53p5MQw=w411-h616-s-no?authuser=0", 
                 symbolImage: "https://placehold.co/150x150/FFC107/000000?text=Lira", 
-                hint: "La inventó Hermes con un caparazón de tortuga."
+                hint: "Empieza con la letra D."
             },
             { 
                 id: "afrodita", name: "Afrodita", motto: "La belleza y el amor florecen conmigo.",
-                description: "Soy Afrodita, la diosa del amor, la belleza, el deseo, el placer y la fertilidad. ¡Muchos dicen que soy la más hermosa de todas las diosas! Nací de la espuma del mar (mi nombre significa 'nacida de la espuma') cerca de Chipre, y llegué a la orilla sobre una gran concha marina. Mis símbolos son la paloma, el cisne, la rosa y la manzana. Tengo un cinturón mágico que hace que cualquiera se enamore de quien lo lleva puesto. Mi hijo más famoso es Eros, el dios del amor (conocido como Cupido por los romanos). Mi equivalente romana es Venus.",
-                quizQuestion: "¿De qué elemento natural nací, llegando a la orilla sobre una concha?",
+                description: "Soy Afrodita, la deslumbrante diosa del amor, la belleza, el deseo, el placer y la fertilidad. ¡Muchos dicen que soy la más hermosa de todas las diosas! Nací de la espuma del mar (mi nombre significa 'nacida de la espuma') cerca de Chipre, y llegué a la orilla sobre una gran concha marina. Mis símbolos son la paloma, el gorrión, el cisne, la rosa y la manzana. Tengo un cinturón mágico, el Cestus, que hace que cualquiera se enamore de quien lo lleva puesto. Mi hijo más famoso es Eros, el dios del amor (conocido como Cupido por los romanos), y estoy casada con Hefesto, el dios herrero, aunque tuve muchos otros amores. Mi equivalente romana es Venus.",
+                quizQuestion: "Tengo un cinturón mágico que inspira amor y deseo. ¿Cómo se llama?",
                 image: "https://photos.fife.usercontent.google.com/pw/AP1GczO3RalRAKt0_MzE4i6Nhlw5pPd1vUGqUKOBfGMeTtOUWIqBUhSIjPml-Q=w411-h616-s-no?authuser=0", 
                 symbolImage: "https://placehold.co/150x150/FFB6C1/000000?text=Concha", 
-                hint: "Está relacionado con el mar."
+                hint: "Empieza con C."
             },
             { 
                 id: "hermes", name: "Hermes", motto: "Veloz como el viento, mensajero divino.",
-                description: "Soy Hermes, el mensajero de los dioses, ¡el más rápido y astuto de todos! Soy hijo de Zeus y la pléyade Maya. Soy el dios de los viajeros, los caminos, el comercio, los pastores, los atletas, los oradores, los pesos y medidas, ¡y también de los ladrones y los tramposos ingeniosos! Llevo un sombrero alado (pétaso), sandalias aladas (talaria) que me permiten volar como el viento, y un bastón mágico llamado caduceo, con dos serpientes enrolladas y a veces alas. Fui yo quien inventó la lira usando un caparazón de tortuga y se la di a Apolo. También guío las almas de los muertos al Inframundo (psicopompo). Mi equivalente romano es Mercurio.",
-                quizQuestion: "¿Qué tipo de calzado especial uso para moverme tan rápido?",
+                description: "Soy Hermes, el más rápido y astuto de los dioses. Soy el mensajero personal de Zeus, y también el dios de los viajeros, los caminos, el comercio, los pastores, los atletas, los oradores, los pesos y medidas, ¡y también de los ladrones y los tramposos ingeniosos! Soy hijo de Zeus y la pléyade Maya. Llevo un sombrero alado (pétaso), sandalias aladas (talaria) que me permiten volar como el viento, y un bastón mágico llamado caduceo, con dos serpientes enrolladas y a veces alas. Fui yo quien inventó la lira usando un caparazón de tortuga y se la di a Apolo. También guío las almas de los muertos al Inframundo (psicopompo). Mi equivalente romano es Mercurio.",
+                quizQuestion: "Además de mensajero, ¿qué instrumento musical inventé y luego regalé a mi hermano Apolo?",
                 image: "https://photos.fife.usercontent.google.com/pw/AP1GczO3RalRAKt0_MzE4i6Nhlw5pPd1vUGqUKOBfGMeTtOUWIqBUhSIjPml-Q=w411-h616-s-no?authuser=0", // Mismo que Afrodita según input
                 symbolImage: "https://placehold.co/150x150/B0E0E6/000000?text=Sandalias", 
-                hint: "Tienen algo que les ayuda a volar."
+                hint: "Es un instrumento de cuerda."
             },
             { 
                 id: "ares", name: "Ares", motto: "¡La furia de la batalla corre por mis venas!",
-                description: "Soy Ares, el dios de la guerra, específicamente de su aspecto más violento, brutal y caótico. ¡Me encanta el fragor del combate! Soy hijo de Zeus y Hera. Mis símbolos son la lanza, el casco, el escudo, y a veces el perro, el buitre y el jabalí. Mis compañeros en la batalla suelen ser mis hijos Deimos (Terror) y Fobos (Miedo). A diferencia de mi hermana Atenea, que representa la estrategia y la guerra justa, yo personifico la sed de sangre y la matanza. Por eso, no siempre fui muy popular entre los otros dioses, ¡pero los espartanos me admiraban! Mi equivalente romano es Marte.",
-                quizQuestion: "¿Quiénes son mis dos hijos que a menudo me acompañan en la batalla, representando el Terror y el Miedo?",
+                description: "Soy Ares, el dios de la guerra, específicamente de su aspecto más violento, brutal y caótico. ¡Me encanta el ruido de las espadas y el fragor de la batalla! Soy hijo de Zeus y Hera. Mis símbolos son la lanza, el casco, el escudo, y a veces el perro, el buitre y el jabalí. Mis compañeros en la batalla suelen ser mis hijos Deimos (Terror) y Fobos (Miedo), y mi hermana Eris (Discordia). A diferencia de mi hermana Atenea, que representa la estrategia y la guerra justa, yo personifico la sed de sangre y la matanza. Por eso, no siempre fui muy popular entre los otros dioses, ¡pero los espartanos me admiraban! Mi equivalente romano es Marte.",
+                quizQuestion: "Mi equivalente romano es Marte. ¿Qué planeta del sistema solar lleva mi nombre romano?",
                 image: "https://photos.fife.usercontent.google.com/pw/AP1GczOjCjjW9sWpTvFaILGRftABAGTWeflSmdJgAMENhk5yposk-7qADX1vtQ=w616-h616-s-no?authuser=0", 
                 symbolImage: "https://placehold.co/150x150/DC143C/FFFFFF?text=Lanza", 
-                hint: "Sus nombres describen sensaciones de la guerra."
+                hint: "Es conocido como el planeta rojo."
             },
             {
                 id: "hades", name: "Hades", motto: "Señor del Inframundo, guardián de las almas.",
-                description: "Soy Hades, hermano de Zeus y Poseidón. Mientras ellos gobiernan el cielo y el mar, yo soy el rey del Inframundo, el reino de los muertos. Aunque mi reino es sombrío, no soy un dios malvado, sino un gobernante justo y severo de las almas. Mi esposa es la bella Perséfone, a quien rapté para que fuera mi reina. Mi perro guardián, Cerbero, tiene tres cabezas y vigila que nadie entre o salga sin permiso. También soy el dios de las riquezas ocultas de la tierra, como los metales preciosos y las gemas. Uno de mis objetos más importantes es el casco de invisibilidad, que me permite moverme sin ser visto. Mi equivalente romano es Plutón.",
-                quizQuestion: "Además de rey del Inframundo, ¿de qué riquezas ocultas soy también el dios?",
+                description: "Soy Hades, hermano de Zeus y Poseidón. Mientras ellos gobiernan el cielo y el mar, yo soy el rey del Inframundo, el reino de los muertos. Es un lugar oscuro y misterioso, pero yo soy un gobernante justo y severo de las almas. Mi esposa es la bella Perséfone, a quien rapté para que fuera mi reina (aunque pasa parte del año conmigo y parte con su madre Deméter, explicando las estaciones). Mi perro guardián, Cerbero, tiene tres cabezas y vigila que nadie entre o salga sin permiso. También soy el dios de las riquezas ocultas de la tierra, como los metales preciosos y las gemas (por eso mi nombre romano es Plutón, que significa 'el rico'). Uno de mis objetos más importantes es el casco de invisibilidad, que me permite moverme sin ser visto.",
+                quizQuestion: "¿Cómo se llama mi esposa, la reina del Inframundo, que también es diosa de la primavera?",
                 image: "https://photos.fife.usercontent.google.com/pw/AP1GczPSoclhcsgGsgvgyDNMpe9iq70PRtRgIiWPm3F6qPZfEL9nF99mw9n0Jg=w616-h616-s-no?authuser=0", 
                 symbolImage: "https://placehold.co/150x150/696969/FFFFFF?text=Cancerbero", 
-                hint: "Se encuentran bajo tierra."
+                hint: "Su madre es Deméter, diosa de la agricultura."
             },
             {
                 id: "artemisa", name: "Artemisa", motto: "Cazadora indómita, protectora de la naturaleza.",
-                description: "Soy Artemisa, diosa de la caza, los animales salvajes, los bosques, la naturaleza virgen, el parto y la virginidad. Soy la hermana gemela de Apolo, hija de Zeus y Leto. Siempre voy armada con mi arco y flechas de plata, y me encanta recorrer los montes acompañada de mis ninfas cazadoras y mis perros. Soy una protectora de los animales jóvenes y también de las muchachas y las mujeres jóvenes. Se me asocia con la Luna, a menudo llevando una luna creciente en mi frente. Soy muy independiente y valoro mi libertad. ¡No me gusta que me interrumpan cuando estoy cazando o descansando en el bosque! Mi equivalente romana es Diana.",
-                quizQuestion: "¿Qué objeto celestial se asocia conmigo, además de la caza y los bosques?",
+                description: "Soy Artemisa, diosa de la caza, los animales salvajes, los bosques, la naturaleza virgen, el parto y la virginidad. Soy la hermana gemela de Apolo, hija de Zeus y Leto. Siempre voy armada con mi arco y flechas de plata, y me encanta recorrer los montes acompañada de mis ninfas cazadoras y mis perros de caza. Soy una protectora de los animales jóvenes y también de las muchachas y las mujeres jóvenes. Se me asocia con la Luna, a menudo llevando una luna creciente en mi frente (aunque a veces se me confunde con Selene, la titánide de la luna). Soy muy independiente y valoro mi libertad. ¡No me gusta que me interrumpan cuando estoy cazando o descansando en el bosque! Mi equivalente romana es Diana.",
+                quizQuestion: "Soy la hermana gemela de un dios muy importante. ¿Quién es mi hermano gemelo?",
                 image: "https://photos.fife.usercontent.google.com/pw/AP1GczOCoU4K4njXAPjNWYgkxS-zHjVD3nafdNzJBvfVwlQ6WILhai2Kx0MdJw=s295-no?authuser=0", 
                 symbolImage: "https://placehold.co/150x150/8FBC8F/000000?text=Arco", 
-                hint: "Brilla en la noche."
+                hint: "Es el dios del sol y la música."
             }
         ];
 
@@ -484,7 +485,6 @@
             img.alt = alt;
             img.className = `shadow-md`; 
             
-            // Añadir clase 'animated-image' solo si no es un placeholder de placehold.co
             if (src && !src.startsWith("https://placehold.co")) { 
                 img.classList.add('animated-image'); 
             }
@@ -500,7 +500,6 @@
         function showLoadingIndicator(container, isLarge = false) { 
             container.innerHTML = '';
             const placeholder = document.createElement('div');
-            // No aplicar image-placeholder aquí si es para texto, solo el spinner
             const loader = document.createElement('div');
             loader.className = 'loading-indicator'; 
             placeholder.appendChild(loader);
@@ -832,4 +831,3 @@
     </script>
 </body>
 </html>
-```
