@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dioses Griegos: IA Interactiva con Netlify</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Chewy&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif; 
+            background-color: #F0F9FF; 
+            overscroll-behavior-y: contain; 
+        }
+        .font-chewy { 
+            font-family: 'Chewy', cursive;
+        }
+        .main-container-app {
+            background-color: #E0F2FE; 
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            max-width: 768px; 
+            width: 100%;
+        }
+        .card-section {
+            background-color: #BFDBFE; 
+            border-radius: 15px;
+            padding: clamp(1rem, 5vw, 1.5rem); 
+            margin-bottom: 1.25rem; 
+        }
+        .nav-button, .action-button, .option-button, .god-menu-item-button, .gemini-button {
+            transition: all 0.2s ease-in-out; 
+            font-family: 'Chewy', cursive;
+        }
+        .gemini-button {
+            background-color: #FCD34D; 
+            color: #78350F; 
+            padding: 0.625rem 1rem; 
+            border-radius: 8px;
+            margin-top: 0.625rem; 
+            font-size: 1.125rem; 
+        }
+        .gemini-button:hover {
+            background-color: #FBBF24; 
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+        .god-menu-item-button {
+            background-color: #93C5FD; color: #1E3A8A; display: flex; flex-direction: column;
+            align-items: center; padding: 0.75rem; border-radius: 12px; text-align: center; cursor: pointer;
+            min-height: 140px; 
+            justify-content: center;
+        }
+        .god-menu-item-button:hover {
+            transform: translateY(-4px) scale(1.05); box-shadow: 0 8px 18px rgba(0,0,0,0.2);
+            background-color: #60A5FA;
+        }
+        .god-menu-item-button img, .learning-image-container img, .quiz-image-container img, .modal-image-container img {
+            object-fit: cover; 
+            border: 3px solid #60A5FA; 
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        .god-menu-item-button img {
+             width: 72px; height: 72px; border-radius: 50%; margin-bottom: 0.5rem; 
+        }
+         .learning-image-container img, .quiz-image-container img, .modal-image-container img {
+            width: clamp(120px, 30vw, 150px); 
+            height: clamp(120px, 30vw, 150px); 
+            border-radius: 15px; margin: auto; 
+        }
+        .god-menu-item-button span { font-size: 1rem; sm:font-size: 1.1rem; font-weight: 600; }
+
+        .quiz-selection-label {
+            display: flex; align-items: center; padding: 0.625rem; background-color: #DBEAFE;
+            border-radius: 8px; margin-bottom: 0.5rem; cursor: pointer; font-size: 1rem; sm:font-size: 1.125rem;
+        }
+        .quiz-selection-label:hover { background-color: #C7D2FE; }
+        .quiz-selection-label input[type="checkbox"] { margin-right: 0.75rem; width: 1.125rem; height: 1.125rem; }
+
+        .correct { background-color: #4ADE80 !important; color: white !important; }
+        .incorrect { background-color: #F87171 !important; color: white !important; }
+        .feedback-animation { animation: fadeIn 0.5s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .modal, .gemini-modal { 
+            display: none; position: fixed; z-index: 50; left: 0; top: 0; width: 100%; height: 100%; 
+            overflow: auto; background-color: rgba(0,0,0,0.65); justify-content: center; align-items: center; 
+            padding: 1rem; 
+        }
+        .modal-content, .gemini-modal-content { 
+            background-color: #fff; margin: auto; padding: clamp(1.25rem, 5vw, 1.75rem); border-radius: 15px; 
+            text-align: center; width: 100%; max-width: 480px; box-shadow: 0 5px 20px rgba(0,0,0,0.3); 
+        }
+        .gemini-modal-content p { 
+            font-family: 'Inter', sans-serif;
+            text-align: left; font-size: 1rem; sm:font-size: 1.05rem; line-height: 1.65; color: #374151;
+            max-height: 60vh; overflow-y: auto; margin-bottom:1rem;
+        }
+        .modal-button, .gemini-modal-button { 
+            padding: 0.625rem 1.25rem; border-radius: 10px; 
+            font-size: 1.05rem; sm:font-size: 1.1rem; cursor: pointer; margin-top: 0.75rem; margin-left: 0.25rem; margin-right: 0.25rem; 
+        }
+        
+        #learning-section, #quiz-god-selection-section, #quiz-section, #next-question-button, #endGameModal, #geminiChatModal, #geminiMythModal, #geminiAdviceModal { display: none; }
+        
+        .animated-image { animation: pulse-grow 2s infinite ease-in-out; }
+        @keyframes pulse-grow { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.03); } } 
+        
+        .god-motto { font-style: italic; color: #2563EB; margin-top: 0.5rem; margin-bottom: 0.75rem; font-size: 1.2rem; sm:font-size: 1.3rem; }
+        #god-learn-description { 
+            font-family: 'Inter', sans-serif;
+            text-align: left; line-height: 1.7; font-size: 1rem; sm:font-size: 1.1rem; color: #1F2937; 
+        }
+        .loading-indicator, .image-loading-indicator {
+            display: inline-block; border: 3px solid #E5E7EB; 
+            border-top: 3px solid #FBBF24; 
+            border-radius: 50%; width: 20px; height: 20px;
+            animation: spin 0.8s linear infinite; margin: 5px auto; 
+        }
+        .image-placeholder { 
+            display: flex; justify-content: center; align-items: center;
+            background-color: #E5E7EB; border: 3px solid #93C5FD;
+        }
+        .god-menu-item-button .image-placeholder {
+            width: 72px; height: 72px; border-radius: 50%; margin-bottom: 0.5rem;
+        }
+        .learning-image-container .image-placeholder, .quiz-image-container .image-placeholder, .modal-image-container .image-placeholder {
+             width: clamp(120px, 30vw, 150px); height: clamp(120px, 30vw, 150px); border-radius: 15px; margin: auto;
+        }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        .title-main { font-size: clamp(2rem, 8vw, 3rem); } 
+        .title-section { font-size: clamp(1.5rem, 6vw, 2.25rem); } 
+        .title-subsection { font-size: clamp(1.25rem, 5vw, 1.875rem); } 
+        
+        input[type="text"] {
+            font-family: 'Inter', sans-serif;
+            color: #1F2937; 
+        }
+        input[type="text"]::placeholder {
+            color: #6B7280; 
+        }
+        .gemini-interaction-group {
+            margin-bottom: 1rem; /* Espacio entre grupos de interacción Gemini */
+        }
+
+    </style>
+</head>
+<body class="flex flex-col items-center justify-start min-h-screen p-2 sm:p-4">
+
+    <div id="app-container" class="main-container-app p-4 sm:p-6 md:p-8">
+        <header class="mb-4 sm:mb-6">
+            <h1 id="main-title" class="font-chewy title-main font-bold text-sky-700">Dioses del Olimpo</h1>
+        </header>
+
+        <section id="main-menu-section" class="card-section">
+            <h2 class="font-chewy title-section text-indigo-700 mb-4 sm:mb-6">Elige un Dios para Aprender</h2>
+            <div id="gods-menu-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8"></div>
+            <button id="go-to-quiz-selection-button" class="action-button w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg text-xl sm:text-2xl shadow-xl">
+                ¡Ir al Quiz!
+            </button>
+        </section>
+
+        <section id="learning-section" class="card-section">
+            <h2 class="font-chewy title-section text-indigo-700 mb-2">Conoce a: <span id="god-learn-name" class="text-yellow-500"></span></h2>
+            <div id="god-learn-image-container" class="learning-image-container my-4 h-auto flex items-center justify-center"> 
+            </div>
+            <p id="god-learn-motto" class="font-chewy god-motto"></p>
+            <p id="god-learn-description" class="min-h-[6em] mb-6"></p> 
+            
+            <div class="my-4 sm:my-6 p-3 sm:p-4 bg-sky-50 rounded-lg shadow-inner">
+                <h3 class="font-chewy title-subsection text-sky-700 mb-3">¡Interactúa con <span id="gemini-interaction-god-name">este Dios</span>!</h3>
+                
+                <div class="gemini-interaction-group">
+                    <input type="text" id="chat-question-input" placeholder="Haz una pregunta al dios..." class="w-full p-2.5 border border-sky-300 rounded-md text-base shadow-sm focus:ring-2 focus:ring-amber-400 focus:border-amber-400">
+                    <button id="ask-chat-button" class="gemini-button w-full sm:w-auto mt-2">
+                        <span id="ask-chat-button-text">Pregunta</span> ✨ 
+                        <span id="chat-loading" style="display:none;" class="loading-indicator"></span>
+                    </button>
+                </div>
+
+                <div class="gemini-interaction-group">
+                    <input type="text" id="advice-request-input" placeholder="Cuéntale tu pequeña preocupación..." class="w-full p-2.5 border border-sky-300 rounded-md text-base shadow-sm focus:ring-2 focus:ring-amber-400 focus:border-amber-400">
+                    <button id="get-advice-button" class="gemini-button w-full sm:w-auto mt-2">
+                        <span id="get-advice-button-text">Pide un Consejo</span> ✨
+                        <span id="advice-loading" style="display:none;" class="loading-indicator"></span>
+                    </button>
+                </div>
+                
+                <div class="gemini-interaction-group">
+                    <button id="generate-myth-button" class="gemini-button w-full sm:w-auto">
+                        <span id="generate-myth-button-text">Descubre un Mini-Mito</span> ✨ 
+                        <span id="myth-loading" style="display:none;" class="loading-indicator"></span>
+                    </button>
+                </div>
+            </div>
+
+            <button id="back-to-main-menu-from-learn-button" class="action-button w-full bg-orange-400 hover:bg-orange-500 text-white font-bold py-3 px-6 rounded-lg text-lg sm:text-xl shadow-md mt-4">
+                Volver al Menú
+            </button>
+        </section>
+
+        <section id="quiz-god-selection-section" class="card-section">
+             <h2 class="font-chewy title-section text-indigo-700 mb-4 sm:mb-6">¿Sobre qué Dioses quieres el Quiz?</h2>
+            <div id="quiz-gods-checkboxes" class="grid grid-cols-1 sm:grid-cols-2 gap-x-3 sm:gap-x-4 gap-y-2 mb-4 sm:mb-6 max-h-60 overflow-y-auto p-2 bg-sky-50 rounded-lg shadow-inner"></div>
+            <div class="flex flex-col sm:flex-row flex-wrap justify-center gap-2 mb-4 sm:mb-6">
+                <button id="select-all-gods-button" class="action-button bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg text-base sm:text-md">Seleccionar Todos</button>
+                <button id="deselect-all-gods-button" class="action-button bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg text-base sm:text-md">Deseleccionar Todos</button>
+            </div>
+            <div class="space-y-3 sm:space-y-0 sm:flex sm:flex-col md:flex-row md:space-x-3 justify-center">
+                <button id="start-selected-quiz-button" class="action-button w-full md:w-auto bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg text-lg sm:text-xl">¡Empezar Quiz!</button>
+                <button id="back-to-main-menu-from-select-button" class="action-button w-full md:w-auto bg-orange-400 hover:bg-orange-500 text-white font-bold py-3 px-6 rounded-lg text-lg sm:text-xl mt-2 md:mt-0">Volver al Menú</button>
+            </div>
+             <p id="quiz-selection-feedback" class="text-red-600 mt-3 text-md sm:text-lg"></p>
+        </section>
+
+        <section id="quiz-section" class="card-section">
+            <div id="quiz-image-container" class="quiz-image-container my-4 h-auto flex items-center justify-center"> 
+            </div>
+            <div id="question-area" class="mb-4 sm:mb-6">
+                <p id="question-text" class="font-chewy text-xl sm:text-2xl text-indigo-700 min-h-[3em]"></p>
+            </div>
+            <div id="options-area" class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4 sm:mb-6"></div>
+            <div id="feedback-area" class="mb-3 sm:mb-4 min-h-[2em]">
+                <p id="feedback-text" class="text-lg sm:text-xl font-semibold"></p>
+            </div>
+            <div id="score-area" class="mb-4 sm:mb-6">
+                <p class="font-chewy text-xl sm:text-2xl text-purple-700">Puntaje: <span id="score" class="font-bold">0</span></p>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-2 justify-center">
+                <button id="next-question-button" class="action-button w-full sm:w-auto bg-yellow-400 hover:bg-yellow-500 text-yellow-800 font-bold py-3 px-6 rounded-lg text-lg sm:text-xl shadow-md">Siguiente Pregunta</button>
+                <button id="quit-quiz-button" class="action-button w-full sm:w-auto bg-gray-400 hover:bg-gray-500 text-white font-bold py-3 px-6 rounded-lg text-lg sm:text-xl shadow-md">Salir del Quiz</button>
+            </div>
+        </section>
+
+        <div id="endGameModal" class="modal">
+            <div class="modal-content">
+                <h2 id="modal-title" class="font-chewy title-section text-sky-700 mb-3">¡Juego Terminado!</h2>
+                <p id="modal-score" class="font-chewy text-xl sm:text-2xl text-indigo-600 mb-2"></p>
+                <p id="modal-message" class="text-lg sm:text-xl text-sky-600 mb-4"></p>
+                <div id="modal-image-container" class="modal-image-container h-auto flex justify-center items-center my-3 sm:my-4"> 
+                </div>
+                <div class="flex flex-col sm:flex-row justify-center gap-2">
+                    <button id="restart-quiz-same-selection-button" class="modal-button bg-green-500 hover:bg-green-600 text-white">Jugar de Nuevo</button>
+                    <button id="modal-change-quiz-selection-button" class="modal-button bg-blue-500 hover:bg-blue-600 text-white">Elegir Dioses</button>
+                </div>
+                 <button id="modal-back-to-main-menu-button" class="modal-button bg-orange-500 hover:bg-orange-600 text-white mt-2">Menú Principal</button>
+            </div>
+        </div>
+
+        <div id="geminiChatModal" class="gemini-modal">
+            <div class="gemini-modal-content">
+                <h2 id="gemini-chat-modal-title" class="font-chewy title-section text-amber-600 mb-3">Respuesta Divina... ✨</h2>
+                <p id="gemini-chat-response"></p>
+                <button id="close-chat-modal-button" class="gemini-modal-button bg-sky-500 hover:bg-sky-600 text-white">Entendido</button>
+            </div>
+        </div>
+
+        <div id="geminiAdviceModal" class="gemini-modal">
+            <div class="gemini-modal-content">
+                <h2 id="gemini-advice-modal-title" class="font-chewy title-section text-teal-600 mb-3">Un Consejo Divino... ✨</h2>
+                <p id="gemini-advice-response"></p>
+                <button id="close-advice-modal-button" class="gemini-modal-button bg-sky-500 hover:bg-sky-600 text-white">¡Gracias!</button>
+            </div>
+        </div>
+        
+        <div id="geminiMythModal" class="gemini-modal">
+            <div class="gemini-modal-content">
+                <h2 id="gemini-myth-modal-title" class="font-chewy title-section text-purple-600 mb-3">Un Mini-Mito para Ti... ✨</h2>
+                <p id="gemini-myth-response"></p>
+                <button id="close-myth-modal-button" class="gemini-modal-button bg-sky-500 hover:bg-sky-600 text-white">¡Genial!</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Elementos UI ---
+        const mainMenuSection = document.getElementById('main-menu-section');
+        const godsMenuGrid = document.getElementById('gods-menu-grid');
+        const goToQuizSelectionButton = document.getElementById('go-to-quiz-selection-button');
+        
+        const learningSection = document.getElementById('learning-section');
+        const godLearnNameElement = document.getElementById('god-learn-name');
+        const godLearnImageContainer = document.getElementById('god-learn-image-container');
+        const godLearnMottoElement = document.getElementById('god-learn-motto');
+        const godLearnDescriptionElement = document.getElementById('god-learn-description');
+        const backToMainMenuFromLearnButton = document.getElementById('back-to-main-menu-from-learn-button');
+        const geminiInteractionGodName = document.getElementById('gemini-interaction-god-name');
+
+        const quizGodSelectionSection = document.getElementById('quiz-god-selection-section');
+        const quizGodsCheckboxes = document.getElementById('quiz-gods-checkboxes');
+        const selectAllGodsButton = document.getElementById('select-all-gods-button');
+        const deselectAllGodsButton = document.getElementById('deselect-all-gods-button');
+        const startSelectedQuizButton = document.getElementById('start-selected-quiz-button');
+        const backToMainMenuFromSelectButton = document.getElementById('back-to-main-menu-from-select-button');
+        const quizSelectionFeedback = document.getElementById('quiz-selection-feedback');
+
+        const quizSection = document.getElementById('quiz-section');
+        const quizImageContainer = document.getElementById('quiz-image-container');
+        const questionTextElement = document.getElementById('question-text');
+        const optionsAreaElement = document.getElementById('options-area');
+        const feedbackTextElement = document.getElementById('feedback-text');
+        const scoreElement = document.getElementById('score');
+        const nextQuestionButton = document.getElementById('next-question-button');
+        const quitQuizButton = document.getElementById('quit-quiz-button');
+        
+        const endGameModal = document.getElementById('endGameModal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalScoreText = document.getElementById('modal-score');
+        const modalMessageText = document.getElementById('modal-message');
+        const modalImageContainer = document.getElementById('modal-image-container');
+        const restartQuizSameSelectionButton = document.getElementById('restart-quiz-same-selection-button');
+        const modalChangeQuizSelectionButton = document.getElementById('modal-change-quiz-selection-button');
+        const modalBackToMainMenuButton = document.getElementById('modal-back-to-main-menu-button');
+        
+        const mainTitleHeader = document.getElementById('main-title');
+
+        // Elementos para Gemini
+        const chatQuestionInput = document.getElementById('chat-question-input');
+        const askChatButton = document.getElementById('ask-chat-button');
+        const askChatButtonText = document.getElementById('ask-chat-button-text');
+        const chatLoading = document.getElementById('chat-loading'); 
+        
+        const adviceRequestInput = document.getElementById('advice-request-input');
+        const getAdviceButton = document.getElementById('get-advice-button');
+        const getAdviceButtonText = document.getElementById('get-advice-button-text');
+        const adviceLoading = document.getElementById('advice-loading');
+
+        const generateMythButton = document.getElementById('generate-myth-button');
+        const generateMythButtonText = document.getElementById('generate-myth-button-text');
+        const mythLoading = document.getElementById('myth-loading');
+
+        const geminiChatModal = document.getElementById('geminiChatModal');
+        const geminiChatModalTitle = document.getElementById('gemini-chat-modal-title');
+        const geminiChatResponse = document.getElementById('gemini-chat-response');
+        const closeChatModalButton = document.getElementById('close-chat-modal-button');
+        
+        const geminiAdviceModal = document.getElementById('geminiAdviceModal');
+        const geminiAdviceModalTitle = document.getElementById('gemini-advice-modal-title');
+        const geminiAdviceResponse = document.getElementById('gemini-advice-response');
+        const closeAdviceModalButton = document.getElementById('close-advice-modal-button');
+
+        const geminiMythModal = document.getElementById('geminiMythModal');
+        const geminiMythModalTitle = document.getElementById('gemini-myth-modal-title'); 
+        const geminiMythResponse = document.getElementById('gemini-myth-response');
+        const closeMythModalButton = document.getElementById('close-myth-modal-button');
+        
+        let currentLearningGodId = null;
+
+        const godsData = [
+            { 
+                id: "zeus", name: "Zeus", motto: "¡El cielo y el trueno me obedecen!",
+                description: "Soy Zeus, el más poderoso de todos los dioses y rey del Olimpo, la montaña donde vivimos. Controlo el cielo, las tormentas, los truenos y los relámpagos con mi poderoso rayo. Mi animal sagrado es el águila, que vuela alto como yo. Aunque soy justo, a veces tengo un carácter fuerte. ¡Todos los dioses y mortales me respetan!",
+                quizQuestion: "Soy el rey del Olimpo y lanzo rayos cuando me enfado. ¿Quién soy?",
+                imagePrompt: "Zeus, king of Greek gods, holding a small, non-threatening lightning bolt. Friendly and colorful cartoon illustration for a children's educational app. Smiling and approachable.",
+                symbolImagePrompt: "A bright yellow lightning bolt. Simple, clear, and colorful icon for a children's game. Clean lines and friendly appearance.",
+                hint: "Mi animal sagrado es el águila."
+            },
+            { 
+                id: "hera", name: "Hera", motto: "Reina del Olimpo, guardiana del hogar.",
+                description: "Soy Hera, la majestuosa reina de los dioses y esposa de Zeus (¡y también su hermana!). Protejo el matrimonio, a las mujeres y a las familias. Mi animal favorito es el pavo real, con su hermosa cola de mil ojos. A veces soy un poco celosa, ¡pero siempre defiendo lo que es importante para mí!",
+                quizQuestion: "Soy la esposa de Zeus y la diosa del matrimonio. Mi símbolo es el pavo real. ¿Quién soy?",
+                imagePrompt: "Hera, queen of Greek gods, wearing a simple diadem, with a small, cute peacock by her side. Friendly and colorful cartoon illustration for a children's educational app. Smiling and approachable.",
+                symbolImagePrompt: "A single, stylized peacock feather with vibrant colors. Simple, clear, and colorful icon for a children's game. Clean lines and friendly appearance.",
+                hint: "Soy la reina de todos los dioses."
+            },
+            { 
+                id: "poseidon", name: "Poseidón", motto: "¡Las olas tiemblan ante mi tridente!",
+                description: "Soy Poseidón, hermano de Zeus y dios de todos los mares, océanos, ríos y también de los terremotos y los caballos. Con mi tridente mágico, puedo calmar las aguas o provocar olas gigantes y tormentas terribles. Los marineros me rezan para tener viajes seguros. ¡Me encantan los caballos y a veces me paseo en un carro tirado por ellos sobre las olas!",
+                quizQuestion: "Controlo los mares con mi tridente y soy hermano de Zeus. ¿Quién soy?",
+                imagePrompt: "Poseidon, Greek god of the sea, holding a small, friendly trident, with wavy blue hair. Friendly and colorful cartoon illustration for a children's educational app. Smiling and approachable.",
+                symbolImagePrompt: "A blue or golden trident. Simple, clear, and colorful icon for a children's game. Clean lines and friendly appearance.",
+                hint: "También soy el dios de los terremotos."
+            },
+            { 
+                id: "atenea", name: "Atenea", motto: "Sabiduría y estrategia, mi estandarte.",
+                description: "Soy Atenea, la diosa de la sabiduría, la inteligencia, las artes, la estrategia en la guerra y la justicia. ¡Nací de una forma muy especial: directamente de la cabeza de Zeus, ya adulta y con armadura! Soy muy astuta y ayudo a los héroes valientes y listos. Mi animal sagrado es el búho, que todo lo ve, y mi planta es el olivo. Siempre llevo mi lanza y mi escudo.",
+                quizQuestion: "Nací de la cabeza de Zeus y soy la diosa de la sabiduría. Un búho me acompaña. ¿Quién soy?",
+                imagePrompt: "Athena, Greek goddess of wisdom, wearing a simple helmet, with a small, wise-looking owl on her shoulder. Friendly and colorful cartoon illustration for a children's educational app. Smiling and approachable.",
+                symbolImagePrompt: "A small, wise-looking owl. Simple, clear, and colorful icon for a children's game. Clean lines and friendly appearance.",
+                hint: "También soy diosa de la estrategia en la guerra."
+            },
+            { 
+                id: "apolo", name: "Apolo", motto: "Luz, música y arte, mi divina inspiración.",
+                description: "Soy Apolo, dios del sol, la luz, la música, la poesía, la medicina, las profecías y el arco. ¡Soy muy talentoso! Toco una lira dorada que encanta a todos y soy un arquero increíble. También puedo ver el futuro y curar a los enfermos. Mi hermana gemela es Artemisa. Cada día conduzco el carro del sol por el cielo.",
+                quizQuestion: "Soy el dios del sol y la música, y toco la lira. Mi hermana es Artemisa. ¿Quién soy?",
+                imagePrompt: "Apollo, Greek god of the sun and music, holding a small golden lyre, with subtle sun rays in the background. Friendly and colorful cartoon illustration for a children's educational app. Smiling and approachable.",
+                symbolImagePrompt: "A small golden lyre. Simple, clear, and colorful icon for a children's game. Clean lines and friendly appearance.",
+                hint: "También soy dios de la profecía y la medicina."
+            },
+            { 
+                id: "afrodita", name: "Afrodita", motto: "La belleza y el amor florecen conmigo.",
+                description: "Soy Afrodita, la deslumbrante diosa del amor, la belleza, el placer y la fertilidad. ¡Dicen que soy la más bella de todas! Nací de la espuma del mar y llegué a la orilla en una concha. Mis animales sagrados son las palomas y los cisnes. Donde yo paso, las flores crecen y el amor surge.",
+                quizQuestion: "Soy la diosa de la belleza y el amor. Nací de la espuma del mar. ¿Quién soy?",
+                imagePrompt: "Aphrodite, Greek goddess of love, surrounded by a few gentle flowers, holding a small seashell. Friendly and colorful cartoon illustration for a children's educational app. Smiling and approachable.",
+                symbolImagePrompt: "A pink or pearlescent seashell. Simple, clear, and colorful icon for a children's game. Clean lines and friendly appearance.",
+                hint: "Mis animales son las palomas y los cisnes."
+            },
+            { 
+                id: "hermes", name: "Hermes", motto: "Veloz como el viento, mensajero divino.",
+                description: "Soy Hermes, el más rápido y astuto de los dioses. Soy el mensajero personal de Zeus, y también el dios de los viajeros, los comerciantes, los atletas ¡y hasta de los ladrones listos! Llevo sandalias con alas y un sombrero también alado que me hacen volar. Con mi bastón mágico, el caduceo, guío a las almas al inframundo.",
+                quizQuestion: "Soy el mensajero de los dioses y llevo sandalias con alas. ¿Quién soy?",
+                imagePrompt: "Hermes, Greek messenger god, wearing small winged sandals and a winged cap, holding a caduceus staff. Friendly and colorful cartoon illustration for a children's educational app. Smiling and approachable.",
+                symbolImagePrompt: "A single winged sandal. Simple, clear, and colorful icon for a children's game. Clean lines and friendly appearance.",
+                hint: "También soy el dios de los comerciantes y viajeros."
+            },
+            { 
+                id: "ares", name: "Ares", motto: "¡La furia de la batalla corre por mis venas!",
+                description: "Soy Ares, el dios de la guerra, la violencia y el coraje. ¡Me encanta el ruido de las espadas y el fragor de la batalla! Siempre estoy listo para luchar, con mi casco brillante, mi escudo y mi lanza. Aunque a veces soy un poco impulsivo, represento la fuerza bruta y el espíritu guerrero.",
+                quizQuestion: "Soy el dios de la guerra y me encanta la batalla. Llevo casco y lanza. ¿Quién soy?",
+                imagePrompt: "Ares, Greek god of war, holding a small, toy-like sword and shield, looking brave but not aggressive. Friendly and colorful cartoon illustration for a children's educational app. Smiling and approachable.",
+                symbolImagePrompt: "A small, simple sword crossed with a round shield. Simple, clear, and colorful icon for a children's game. Clean lines and friendly appearance.",
+                hint: "Mi hermana Atenea también es diosa de la guerra, pero más estratégica."
+            },
+            {
+                id: "hades", name: "Hades", motto: "Señor del Inframundo, guardián de las almas.",
+                description: "Soy Hades, hermano de Zeus y Poseidón, y el rey del Inframundo, el reino de los muertos. Es un lugar oscuro y misterioso, pero yo soy un gobernante justo, no malvado. Mi perro guardián, Cerbero, tiene tres cabezas y vigila la entrada. También soy el dios de las riquezas que se encuentran bajo tierra, como los metales y las gemas preciosas. Llevo un casco que me hace invisible.",
+                quizQuestion: "Soy el rey del Inframundo y mi perro guardián tiene tres cabezas. ¿Quién soy?",
+                imagePrompt: "Hades, Greek god of the underworld, with a serious but not scary expression, a hint of a crown, and a small, non-frightening, three-headed dog (Cerberus) stylized cutely at his feet. Friendly and colorful cartoon illustration for a children's educational app.",
+                symbolImagePrompt: "A simple, dark grey or black two-pronged bident. Simple, clear, and colorful icon for a children's game. Clean lines and friendly appearance.",
+                hint: "Soy hermano de Zeus y Poseidón."
+            },
+            {
+                id: "artemisa", name: "Artemisa", motto: "Cazadora indómita, protectora de la naturaleza.",
+                description: "Soy Artemisa, diosa de la caza, los bosques, los animales salvajes, la naturaleza y la luna. Soy la hermana gemela de Apolo. Me encanta correr libre por los montes con mi arco y flechas de plata, acompañada de mis ninfas y mis perros de caza. Protejo a los animales jóvenes y a las muchachas. ¡No me gusta que me molesten cuando estoy cazando!",
+                quizQuestion: "Soy la diosa de la caza y la luna, y hermana gemela de Apolo. Llevo arco y flechas. ¿Quién soy?",
+                imagePrompt: "Artemis, Greek goddess of the hunt, holding a small bow and arrow, with a small, cute deer nearby. Friendly and colorful cartoon illustration for a children's educational app. Smiling and approachable.",
+                symbolImagePrompt: "A small bow with an arrow. Simple, clear, and colorful icon for a children's game. Clean lines and friendly appearance.",
+                hint: "Me encanta la naturaleza y los animales salvajes."
+            }
+        ];
+
+        const modalImagePrompts = {
+            trophy: "A shiny golden trophy cup with stars around it. Bright, cheerful, and celebratory cartoon illustration for a children's game modal.",
+            wellDone: "A smiling gold medal with a red ribbon, and the text '¡Bien Hecho!' in a fun font. Bright, cheerful, and celebratory cartoon illustration for a children's game modal.",
+            champion: "A golden laurel wreath with a sparkling star in the center, and the text '¡Campeón!' in a fun, bold font. Bright, cheerful, and celebratory cartoon illustration for a children's game modal.",
+            thumbsUp: "A cute, friendly cartoon character giving a big thumbs up with a happy expression. Bright, cheerful, and celebratory cartoon illustration for a children's game modal.",
+            book: "An open magical book with colorful illustrations of stars and swirls coming out of its pages. Bright, cheerful, and celebratory cartoon illustration for a children's game modal."
+        };
+        
+        let currentQuizQuestions = [];
+        let currentQuizQuestionIndex = 0;
+        let currentScore = 0;
+        let audioInitialized = false;
+        let selectedGodsForQuiz = [];
+
+        let clickSynth, correctSynth, incorrectSynth, navigationSynth, gameEventSynth, geminiSynth;
+
+        function initializeSounds() { 
+            if (audioInitialized) return;
+            clickSynth = new Tone.MembraneSynth({ pitchDecay: 0.008, octaves: 3, envelope: { attack: 0.0006, decay: 0.2, sustain: 0 }, volume: -18 }).toDestination();
+            correctSynth = new Tone.Synth({ oscillator: { type: "triangle" }, envelope: { attack: 0.005, decay: 0.1, sustain: 0.05, release: 0.3 }, volume: -12 }).toDestination();
+            incorrectSynth = new Tone.FMSynth({ harmonicity: 1.2, modulationIndex: 5, oscillator: { type: "square" }, envelope: { attack: 0.01, decay: 0.2, sustain: 0, release: 0.2 }, modulation: { type: "sawtooth" }, modulationEnvelope: { attack: 0.01, decay: 0.1, sustain: 0, release: 0.1 }, volume: -12 }).toDestination();
+            navigationSynth = new Tone.PluckSynth({ attackNoise: 0.8, dampening: 5000, resonance: 0.7, volume: -15 }).toDestination();
+            gameEventSynth = new Tone.Synth({ oscillator: { type: 'pulse', width: 0.5 }, envelope: { attack: 0.01, decay: 0.4, sustain: 0.1, release: 0.4 }, volume: -10 }).toDestination();
+            geminiSynth = new Tone.Synth({ oscillator: {type: "sine"}, envelope: {attack: 0.01, decay: 0.2, sustain: 0.1, release: 0.5}, volume: -10}).toDestination();
+            audioInitialized = true;
+        }
+        
+        async function playSound(synthType, note, duration, time) {
+            if (!audioInitialized || !Tone.context || Tone.context.state !== 'running') {
+                try {
+                    await Tone.start();
+                    console.log("Contexto de Audio iniciado.");
+                    initializeSounds();
+                } catch (e) { console.error("Error al iniciar Tone.js:", e); return; }
+            }
+            let synthInstance;
+            switch(synthType) {
+                case 'click': synthInstance = clickSynth; break;
+                case 'correct': synthInstance = correctSynth; break;
+                case 'incorrect': synthInstance = incorrectSynth; break;
+                case 'navigation': synthInstance = navigationSynth; break;
+                case 'gameEvent': synthInstance = gameEventSynth; break;
+                case 'gemini': synthInstance = geminiSynth; break;
+                default: console.warn("Tipo de synth desconocido:", synthType); return;
+            }
+            if (synthInstance) {
+                 if (time) synthInstance.triggerAttackRelease(note, duration, time);
+                 else synthInstance.triggerAttackRelease(note, duration);
+            }
+        }
+
+        // Rutas para las Netlify Functions (reemplazar con las URLs reales de las funciones desplegadas si es necesario)
+        const NETLIFY_FUNCTION_PATH_IMAGEN = "/.netlify/functions/imagen-generate";
+        const NETLIFY_FUNCTION_PATH_GEMINI_TEXT = "/.netlify/functions/gemini-text";
+
+        async function generateImageAI(prompt, storageKey) { 
+            try {
+                const cachedImage = sessionStorage.getItem(storageKey);
+                if (cachedImage) {
+                    console.log(`[CACHE] Imagen encontrada en sessionStorage para ${storageKey}`);
+                    return cachedImage;
+                }
+            } catch (e) {
+                console.warn("Error leyendo de sessionStorage (cache):", e);
+            }
+
+            console.log(`[API CALL INIT VIA NETLIFY FN] Imagen para ${storageKey}. Prompt: ${prompt ? prompt.substring(0,70) : 'PROMPT_UNDEFINED'}...`);
+            const payload = { prompt: prompt }; 
+            
+            try {
+                const response = await fetch(NETLIFY_FUNCTION_PATH_IMAGEN, { // Llamada a la Netlify Function
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                console.log(`[DEBUG] Netlify Function (Imagen) Response Status para ${storageKey}:`, response.status);
+                if (!response.ok) {
+                    const errorBody = await response.text();
+                    let detailedErrorMessage = `Error de Netlify Function (Imagen) (${response.status}) para ${storageKey}: ${errorBody}`;
+                    if (response.status === 401 || response.status === 403 ) { // Manejar 401/403 desde la función Netlify
+                        detailedErrorMessage += " Problema de autorización/autenticación al llamar a la API de Google desde la función Netlify. Verifica las variables de entorno de la API Key en Netlify.";
+                    }
+                    console.error(detailedErrorMessage);
+                    throw new Error(`Error de Netlify Function (Imagen): ${response.status}`);
+                }
+                const result = await response.json(); // La función Netlify debe devolver el JSON de la API de Google
+                
+                if (result.predictions && result.predictions.length > 0 && result.predictions[0].bytesBase64Encoded) {
+                    const imageUrl = `data:image/png;base64,${result.predictions[0].bytesBase64Encoded}`;
+                    try {
+                        sessionStorage.setItem(storageKey, imageUrl); 
+                        console.log(`[CACHE] Imagen guardada en sessionStorage para ${storageKey}`);
+                    } catch (e) {
+                        console.warn(`Error guardando en sessionStorage para ${storageKey}:`, e);
+                    }
+                    return imageUrl;
+                } else if (result.error) { // Si la función Netlify devolvió un error estructurado
+                    console.error(`Error desde la función Netlify (Imagen) para ${storageKey}:`, result.error, result.details || '');
+                     throw new Error(result.error || "Error desconocido desde la función Netlify (Imagen).");
+                }else {
+                    console.error("Respuesta inesperada desde la función Netlify (Imagen):", result);
+                    throw new Error("No se pudo generar la imagen a través de la función Netlify.");
+                }
+            } catch (error) {
+                console.error(`Error generando imagen con IA (vía Netlify Function) para ${storageKey}:`, error);
+                return null;
+            }
+        }
+
+        function createImageElement(src, alt, isLarge = false) { 
+            const img = document.createElement('img');
+            const fallbackSize = isLarge ? "150x150" : "80x80";
+            const fallbackText = isLarge ? "Error Imagen" : "Err";
+            img.src = src || `https://placehold.co/${fallbackSize}/E5E7EB/9CA3AF?text=${encodeURIComponent(fallbackText)}`;
+            img.alt = alt;
+            img.className = `shadow-md`; 
+            if (src && src.startsWith("data:")) { img.classList.add('animated-image'); }
+            img.onerror = () => { 
+                img.src = `https://placehold.co/${fallbackSize}/E5E7EB/9CA3AF?text=${encodeURIComponent("Fallo Carga")}`;
+                img.alt = `Error al cargar: ${alt}`;
+                img.classList.remove('animated-image');
+            };
+            return img;
+        }
+        function showLoadingIndicator(container, isLarge = false) { 
+            container.innerHTML = '';
+            const placeholder = document.createElement('div');
+            placeholder.className = 'image-placeholder'; 
+            const loader = document.createElement('div');
+            loader.className = 'image-loading-indicator';
+            placeholder.appendChild(loader);
+            container.appendChild(placeholder);
+        }
+
+        function showSection(sectionId) { 
+            [mainMenuSection, learningSection, quizGodSelectionSection, quizSection].forEach(sec => sec.style.display = 'none');
+            document.getElementById(sectionId).style.display = 'block';
+            if (sectionId === 'main-menu-section') mainTitleHeader.textContent = "Dioses del Olimpo";
+            if (sectionId === 'quiz-god-selection-section') mainTitleHeader.textContent = "Elige Dioses para el Quiz";
+            if (sectionId === 'quiz-section') mainTitleHeader.textContent = "¡Adivina el Dios!";
+        }
+
+        async function populateMainMenu() { 
+            godsMenuGrid.innerHTML = '';
+            for (const god of godsData) {
+                const godButton = document.createElement('button');
+                godButton.className = 'god-menu-item-button focus:outline-none focus:ring-2 focus:ring-yellow-400';
+                const imgDisplayArea = document.createElement('div'); 
+                const nameSpan = document.createElement('span');
+                nameSpan.textContent = god.name;
+                godButton.appendChild(imgDisplayArea); 
+                godButton.appendChild(nameSpan);
+                godButton.onclick = () => { playSound('click', "C4", "8n"); displayLearnGod(god.id); };
+                godsMenuGrid.appendChild(godButton);
+                
+                showLoadingIndicator(imgDisplayArea, false); 
+                const storageKey = `app_img_${god.id}_main`;
+                try {
+                    const imageUrl = await generateImageAI(god.imagePrompt, storageKey);
+                    imgDisplayArea.innerHTML = ''; 
+                    imgDisplayArea.appendChild(createImageElement(imageUrl, `[Imagen de ${god.name}]`));
+                } catch (e) {
+                    imgDisplayArea.innerHTML = ''; 
+                    imgDisplayArea.appendChild(createImageElement(null, `[Error al cargar ${god.name}]`));
+                }
+            }
+        }
+
+        async function displayLearnGod(godId) {
+            const god = godsData.find(g => g.id === godId);
+            if (!god) return;
+            currentLearningGodId = god.id;
+            
+            mainTitleHeader.textContent = `Conoce a ${god.name}`;
+            godLearnNameElement.textContent = god.name;
+            godLearnMottoElement.textContent = `"${god.motto}"`;
+            godLearnDescriptionElement.textContent = god.description;
+            chatQuestionInput.value = ''; 
+            adviceRequestInput.value = ''; 
+            
+            geminiInteractionGodName.textContent = god.name;
+            askChatButtonText.textContent = `Pregunta a ${god.name}`;
+            getAdviceButtonText.textContent = `Pide Consejo a ${god.name}`;
+            generateMythButtonText.textContent = `Descubre un Mito de ${god.name}`;
+            
+            showLoadingIndicator(godLearnImageContainer, true); 
+            const storageKey = `app_img_${god.id}_main`; 
+            try {
+                const imageUrl = await generateImageAI(god.imagePrompt, storageKey);
+                godLearnImageContainer.innerHTML = '';
+                godLearnImageContainer.appendChild(createImageElement(imageUrl, `[Imagen de ${god.name}]`, true));
+            } catch (e) {
+                 godLearnImageContainer.innerHTML = '';
+                 godLearnImageContainer.appendChild(createImageElement(null, `[Error al cargar ${god.name}]`, true));
+            }
+            showSection('learning-section');
+            playSound('navigation', "E5", "16n");
+        }
+        
+        function populateQuizGodSelection() { 
+            quizGodsCheckboxes.innerHTML = '';
+            quizSelectionFeedback.textContent = '';
+            godsData.forEach(god => {
+                const label = document.createElement('label');
+                label.className = 'quiz-selection-label text-lg text-sky-800';
+                label.innerHTML = `
+                    <input type="checkbox" value="${god.id}" name="quiz_god" class="form-checkbox h-5 w-5 text-blue-600 rounded focus:ring-blue-500">
+                    <span>${god.name}</span>
+                `;
+                quizGodsCheckboxes.appendChild(label);
+            });
+            showSection('quiz-god-selection-section');
+        }
+
+        function shuffleArray(array) { 
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+        function generateQuizQuestions(sourceGodsData) {
+            currentQuizQuestions = [];
+            const shuffledSourceGods = [...sourceGodsData];
+            shuffleArray(shuffledSourceGods);
+            for (let i = 0; i < shuffledSourceGods.length; i++) {
+                const correctGod = shuffledSourceGods[i];
+                const allOtherGods = godsData.filter(g => g.id !== correctGod.id);
+                shuffleArray(allOtherGods);
+                const options = [correctGod.name];
+                for (let j = 0; j < 2 && j < allOtherGods.length; j++) { 
+                    options.push(allOtherGods[j].name);
+                }
+                shuffleArray(options);
+                currentQuizQuestions.push({
+                    text: correctGod.quizQuestion,
+                    godId: correctGod.id, 
+                    options: options,
+                    answer: correctGod.name,
+                    hint: correctGod.hint
+                });
+            }
+        }
+        
+        async function displayQuizQuestion() { 
+            if (currentQuizQuestionIndex < currentQuizQuestions.length) {
+                const currentQuestion = currentQuizQuestions[currentQuizQuestionIndex];
+                questionTextElement.textContent = currentQuestion.text;
+                const godForSymbol = godsData.find(g => g.id === currentQuestion.godId);
+                
+                showLoadingIndicator(quizImageContainer, true); 
+                if (godForSymbol) {
+                    const storageKeySymbol = `app_img_${godForSymbol.id}_symbol`;
+                    try {
+                        const symbolUrl = await generateImageAI(godForSymbol.symbolImagePrompt, storageKeySymbol);
+                        quizImageContainer.innerHTML = '';
+                        quizImageContainer.appendChild(createImageElement(symbolUrl, `[Símbolo de ${currentQuestion.answer}]`, true));
+                    } catch (e) {
+                        quizImageContainer.innerHTML = '';
+                        quizImageContainer.appendChild(createImageElement(null, `[Error al cargar símbolo de ${currentQuestion.answer}]`, true));
+                    }
+                } else {
+                     quizImageContainer.innerHTML = '';
+                     quizImageContainer.appendChild(createImageElement(null, `[Símbolo no encontrado]`, true));
+                }
+                optionsAreaElement.innerHTML = '';
+                currentQuestion.options.forEach(option => {
+                    const button = document.createElement('button');
+                    button.textContent = option;
+                    button.className = 'option-button w-full bg-sky-500 hover:bg-sky-600 text-white font-semibold py-3 px-4 rounded-lg text-lg md:text-xl shadow focus:outline-none focus:ring-2 focus:ring-yellow-400';
+                    button.onclick = () => { playSound('click', "C4", "8n"); checkAnswer(option, button); }
+                    optionsAreaElement.appendChild(button);
+                });
+                feedbackTextElement.textContent = '';
+                feedbackTextElement.className = 'text-lg md:text-xl font-semibold';
+                nextQuestionButton.style.display = 'none';
+            } else {
+                endGame();
+            }
+        }
+        function checkAnswer(selectedOption, buttonElement) { 
+             const currentQuestion = currentQuizQuestions[currentQuizQuestionIndex];
+            const allOptionButtons = optionsAreaElement.querySelectorAll('.option-button');
+            allOptionButtons.forEach(btn => btn.disabled = true);
+            if (selectedOption === currentQuestion.answer) {
+                currentScore++;
+                feedbackTextElement.textContent = '¡Correcto! 🎉';
+                feedbackTextElement.classList.add('text-green-500', 'feedback-animation');
+                buttonElement.classList.add('correct');
+                playSound('correct', "C5", "8n", Tone.now());
+                setTimeout(() => playSound('correct', "G5", "8n", Tone.now() + 0.12), 120);
+            } else {
+                feedbackTextElement.textContent = `¡Oh no! La respuesta era ${currentQuestion.answer}. ${currentQuestion.hint || ''}`;
+                feedbackTextElement.classList.add('text-red-500', 'feedback-animation');
+                buttonElement.classList.add('incorrect');
+                playSound('incorrect', "C3", "4n");
+                allOptionButtons.forEach(btn => {
+                    if (btn.textContent === currentQuestion.answer) {
+                        btn.classList.add('correct');
+                    }
+                });
+            }
+            scoreElement.textContent = currentScore;
+            nextQuestionButton.style.display = 'block';
+        }
+        function nextQuizQuestionHandler() { 
+            playSound('click', "E4", "8n");
+            currentQuizQuestionIndex++;
+            displayQuizQuestion();
+        }
+        function startQuiz() { 
+            currentQuizQuestionIndex = 0;
+            currentScore = 0;
+            scoreElement.textContent = currentScore;
+            const godsToQuiz = godsData.filter(god => selectedGodsForQuiz.includes(god.id));
+            generateQuizQuestions(godsToQuiz);
+            if (currentQuizQuestions.length === 0) {
+                quizSelectionFeedback.textContent = "Error: No hay preguntas para los dioses seleccionados.";
+                showSection('quiz-god-selection-section');
+                return;
+            }
+            displayQuizQuestion(); 
+            showSection('quiz-section');
+            endGameModal.style.display = 'none';
+            nextQuestionButton.style.display = 'none';
+        }
+
+        async function endGame() { 
+            playSound('gameEvent', "G4", "2n");
+            modalScoreText.textContent = `Tu puntaje: ${currentScore} de ${currentQuizQuestions.length}`;
+            let message = "";
+            let imageKey = "trophy"; 
+            if (currentQuizQuestions.length === 0) {
+                 message = "No se generaron preguntas. ¡Intenta seleccionar algunos dioses!";
+                 modalTitle.textContent = "¡Oh Vaya!";
+                 imageKey = "book"; 
+            } else if (currentScore === currentQuizQuestions.length) {
+                message = "¡Felicidades! ¡Eres un experto en Dioses Griegos! 🏆";
+                modalTitle.textContent = "¡Excelente!";
+                imageKey = "champion";
+            } else if (currentScore >= currentQuizQuestions.length / 2) {
+                message = "¡Muy bien hecho! Sabes mucho sobre los Dioses. 👍";
+                modalTitle.textContent = "¡Buen Trabajo!";
+                imageKey = "wellDone";
+            } else {
+                message = "¡Sigue aprendiendo! Los Dioses Griegos son fascinantes. 😊";
+                modalTitle.textContent = "¡No te rindas!";
+                imageKey = "book";
+            }
+            modalMessageText.textContent = message;
+            showLoadingIndicator(modalImageContainer, true); 
+            const storageKeyModal = `app_img_modal_${imageKey}`;
+            try {
+                const imageUrl = await generateImageAI(modalImagePrompts[imageKey], storageKeyModal);
+                modalImageContainer.innerHTML = '';
+                modalImageContainer.appendChild(createImageElement(imageUrl, `[${imageKey}]`, true));
+            } catch (e) {
+                modalImageContainer.innerHTML = '';
+                modalImageContainer.appendChild(createImageElement(null, `[Error al cargar imagen de modal]`, true));
+            }
+            endGameModal.style.display = 'flex';
+        }
+        
+        async function callGeminiAPI(prompt, loadingElement, responseElement, modalElement, modalTitleElement, modalTitleText) { 
+            loadingElement.style.display = 'inline-block';
+            responseElement.textContent = 'El Olimpo está meditando tu pregunta...'; 
+            if(modalTitleElement && modalTitleText) modalTitleElement.textContent = modalTitleText;
+            playSound('gemini', "C4", "2n");
+            
+            const payload = { prompt: prompt }; // Payload para la Netlify Function de texto
+            
+            try {
+                const response = await fetch(NETLIFY_FUNCTION_PATH_GEMINI_TEXT, { // Llamada a la Netlify Function
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                 console.log(`[DEBUG] Netlify Function (Texto) Response Status:`, response.status);
+                if (!response.ok) {
+                     const errorBody = await response.text();
+                     console.error(`Error de Netlify Function (Texto) (${response.status}): ${errorBody}`);
+                     throw new Error(`Error de Netlify Function (Texto): ${response.status}`);
+                }
+                const result = await response.json(); // La función Netlify debe devolver el JSON de la API de Google
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const text = result.candidates[0].content.parts[0].text;
+                    responseElement.textContent = text;
+                    playSound('gemini', "G4", "2n");
+                } else if (result.error) {
+                    console.error("Error desde la función Netlify (Texto):", result.error, result.details || '');
+                    responseElement.textContent = "Parece que las Musas no están inspiradas hoy (error desde función). Intenta de nuevo.";
+                    playSound('incorrect', "A2", "1n");
+                }
+                else {
+                    responseElement.textContent = "Parece que las Musas no están inspiradas hoy. Intenta de nuevo.";
+                    playSound('incorrect', "A2", "1n");
+                }
+            } catch (error) {
+                console.error("Error llamando a la función Netlify para Gemini API:", error);
+                responseElement.textContent = "Hubo un problema contactando al Olimpo (vía Netlify). Revisa tu conexión o intenta más tarde.";
+                playSound('incorrect', "A2", "1n");
+            } finally {
+                loadingElement.style.display = 'none';
+                if (modalElement) modalElement.style.display = 'flex';
+            }
+        }
+
+        askChatButton.addEventListener('click', () => { 
+            const userQuestion = chatQuestionInput.value.trim();
+            if (!userQuestion) { alert("Por favor, escribe una pregunta para el dios."); return; } 
+            if (!currentLearningGodId) return;
+            const god = godsData.find(g => g.id === currentLearningGodId);
+            if (!god) return;
+
+            const modalTitleText = `${god.name} te Responde... ✨`;
+            const prompt = `Eres ${god.name}. Tu lema es "${god.motto}". Un niño curioso de 9 años te pregunta: '${userQuestion}'. Responde en primera persona, como si fueras ${god.name}, de manera sencilla, amigable y fascinante, en aproximadamente 3 o 4 frases. Basa tu respuesta en tu personalidad y poderes descritos como: '${god.description}'. No digas que eres un modelo de lenguaje o una IA, solo actúa como ${god.name}. Mantén el lenguaje apropiado para un niño.`;
+            callGeminiAPI(prompt, chatLoading, geminiChatResponse, geminiChatModal, geminiChatModalTitle, modalTitleText);
+        });
+
+        getAdviceButton.addEventListener('click', () => {
+            const userProblem = adviceRequestInput.value.trim();
+            if (!userProblem) { alert("Por favor, describe tu pequeña preocupación para pedir un consejo."); return; }
+            if (!currentLearningGodId) return;
+            const god = godsData.find(g => g.id === currentLearningGodId);
+            if (!god) return;
+            
+            const modalTitleText = `Un Consejo de ${god.name}... ✨`;
+            const prompt = `Eres ${god.name}, el dios/diosa griego/griega. Tu lema es "${god.motto}". Un niño de 9 años está un poco preocupado/a y te cuenta: '${userProblem}'. Como ${god.name}, ¿qué consejo sabio y alentador le darías en 2-3 frases? Responde en primera persona, usando tu personalidad y poderes como se describen en: '${god.description}'. Mantén un lenguaje sencillo y amigable para un niño. No menciones que eres un modelo de lenguaje o IA.`;
+            callGeminiAPI(prompt, adviceLoading, geminiAdviceResponse, geminiAdviceModal, geminiAdviceModalTitle, modalTitleText);
+        });
+
+        generateMythButton.addEventListener('click', () => { 
+            if (!currentLearningGodId) return;
+            const god = godsData.find(g => g.id === currentLearningGodId);
+            if (!god) return;
+
+            const modalTitleText = `Un Mini-Mito sobre ${god.name}... ✨`;
+            const prompt = `Crea un mini-mito o una historia muy corta (3-5 frases) para un niño de 9 años sobre el dios griego ${god.name}. La historia debe ser simple, emocionante y destacar una característica importante del dios. No menciones que eres un modelo de lenguaje o una IA.`;
+            callGeminiAPI(prompt, mythLoading, geminiMythResponse, geminiMythModal, geminiMythModalTitle, modalTitleText);
+        });
+
+        closeChatModalButton.addEventListener('click', () => { geminiChatModal.style.display = 'none'; playSound('click', "C3", "8n"); });
+        closeAdviceModalButton.addEventListener('click', () => { geminiAdviceModal.style.display = 'none'; playSound('click', "C3", "8n"); });
+        closeMythModalButton.addEventListener('click', () => { geminiMythModal.style.display = 'none'; playSound('click', "C3", "8n"); });
+
+        goToQuizSelectionButton.addEventListener('click', () => { playSound('click', "D4", "8n"); populateQuizGodSelection(); });
+        backToMainMenuFromLearnButton.addEventListener('click', () => { playSound('click', "A3", "8n"); showSection('main-menu-section'); });
+        backToMainMenuFromSelectButton.addEventListener('click', () => { playSound('click', "A3", "8n"); showSection('main-menu-section'); });
+        selectAllGodsButton.addEventListener('click', () => { playSound('click', "C4", "16n"); quizGodsCheckboxes.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = true); });
+        deselectAllGodsButton.addEventListener('click', () => { playSound('click', "C4", "16n"); quizGodsCheckboxes.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false); });
+        startSelectedQuizButton.addEventListener('click', () => {
+            selectedGodsForQuiz = Array.from(quizGodsCheckboxes.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
+            if (selectedGodsForQuiz.length === 0) {
+                quizSelectionFeedback.textContent = "¡Por favor, selecciona al menos un dios para el quiz!";
+                playSound('incorrect', "A2", "4n"); return;
+            }
+            quizSelectionFeedback.textContent = ""; playSound('gameEvent', "C4", "4n"); startQuiz();
+        });
+        nextQuestionButton.addEventListener('click', nextQuizQuestionHandler);
+        quitQuizButton.addEventListener('click', () => { playSound('click', "G3", "8n"); showSection('main-menu-section'); });
+        restartQuizSameSelectionButton.addEventListener('click', () => {
+            playSound('gameEvent', "C4", "4n"); endGameModal.style.display = 'none';
+            if (selectedGodsForQuiz.length > 0) startQuiz(); else populateQuizGodSelection();
+        });
+        modalChangeQuizSelectionButton.addEventListener('click', () => { playSound('click', "D4", "8n"); endGameModal.style.display = 'none'; populateQuizGodSelection(); });
+        modalBackToMainMenuButton.addEventListener('click', () => { playSound('click', "A3", "8n"); endGameModal.style.display = 'none'; showSection('main-menu-section'); });
+
+        function initializeApp() {
+            populateMainMenu(); 
+            showSection('main-menu-section');
+        }
+
+        initializeApp();
+    </script>
+</body>
+</html>
