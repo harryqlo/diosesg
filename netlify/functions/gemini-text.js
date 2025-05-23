@@ -2,8 +2,7 @@
 
 exports.handler = async function(event, context) {
     console.log("[Netlify Fn gemini-text] Iniciando ejecución de la función.");
-    console.log("[Netlify Fn gemini-text] Variables de entorno disponibles (claves):", Object.keys(process.env).join(', ')); // Log para ver todas las claves de entorno
-
+    
     if (event.httpMethod !== 'POST') {
         console.warn("[Netlify Fn gemini-text] Método HTTP no permitido:", event.httpMethod);
         return {
@@ -25,25 +24,22 @@ exports.handler = async function(event, context) {
             };
         }
 
-        const apiKey = process.env.GOOGLE_GEMINI_API_KEY;
+        const apiKey = process.env.GOOGLE_GEMINI_API_KEY; 
         
-        // Log detallado para la clave API
-        if (apiKey) {
-            console.log("[Netlify Fn gemini-text] GOOGLE_GEMINI_API_KEY encontrada. Longitud:", apiKey.length); // Muestra la longitud para verificar que no esté vacía
-        } else {
+        if (!apiKey) {
             console.error("[Netlify Fn gemini-text] FATAL ERROR: La variable de entorno GOOGLE_GEMINI_API_KEY NO está configurada o es undefined/null en Netlify.");
-            // Log adicional para ver si existe pero con otro casing, aunque process.env suele ser case-sensitive en Node.
             const envKeys = Object.keys(process.env);
             const geminiKeyVariant = envKeys.find(key => key.toUpperCase() === 'GOOGLE_GEMINI_API_KEY');
             if (geminiKeyVariant && geminiKeyVariant !== 'GOOGLE_GEMINI_API_KEY') {
                  console.error(`[Netlify Fn gemini-text] Se encontró una variante: '${geminiKeyVariant}'. ¿Es un error de mayúsculas/minúsculas?`);
             }
-
             return {
                 statusCode: 500,
                 body: JSON.stringify({ error: 'Error de configuración del servidor: Clave de API de Gemini no encontrada en el entorno de la función.' }),
                 headers: { 'Content-Type': 'application/json' },
             };
+        } else {
+             console.log("[Netlify Fn gemini-text] GOOGLE_GEMINI_API_KEY encontrada. Longitud:", apiKey.length);
         }
 
         const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
