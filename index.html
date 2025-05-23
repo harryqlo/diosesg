@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dioses Griegos: IA Interactiva con Netlify</title>
+    <title>Dioses Griegos</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Chewy&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
@@ -104,7 +104,7 @@
         
         #learning-section, #quiz-god-selection-section, #quiz-section, #next-question-button, #endGameModal, #geminiChatModal, #geminiMythModal, #geminiAdviceModal { display: none; }
         
-        .animated-image { animation: pulse-grow 2s infinite ease-in-out; }
+        .animated-image { animation: pulse-grow 2s infinite ease-in-out; } /* Se puede quitar si no se usan GIFs animados */
         @keyframes pulse-grow { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.03); } } 
         
         .god-motto { font-style: italic; color: #2563EB; margin-top: 0.5rem; margin-bottom: 0.75rem; font-size: 1.2rem; sm:font-size: 1.3rem; }
@@ -112,23 +112,12 @@
             font-family: 'Inter', sans-serif;
             text-align: left; line-height: 1.7; font-size: 1rem; sm:font-size: 1.1rem; color: #1F2937; 
         }
-        .loading-indicator, .image-loading-indicator {
+        .loading-indicator { /* Solo para cargas de texto de Gemini ahora */
             display: inline-block; border: 3px solid #E5E7EB; 
             border-top: 3px solid #FBBF24; 
             border-radius: 50%; width: 20px; height: 20px;
             animation: spin 0.8s linear infinite; margin: 5px auto; 
         }
-        .image-placeholder { 
-            display: flex; justify-content: center; align-items: center;
-            background-color: #E5E7EB; border: 3px solid #93C5FD;
-        }
-        .god-menu-item-button .image-placeholder {
-            width: 72px; height: 72px; border-radius: 50%; margin-bottom: 0.5rem;
-        }
-        .learning-image-container .image-placeholder, .quiz-image-container .image-placeholder, .modal-image-container .image-placeholder {
-             width: clamp(120px, 30vw, 150px); height: clamp(120px, 30vw, 150px); border-radius: 15px; margin: auto;
-        }
-
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
         .title-main { font-size: clamp(2rem, 8vw, 3rem); } 
@@ -143,7 +132,7 @@
             color: #6B7280; 
         }
         .gemini-interaction-group {
-            margin-bottom: 1rem; /* Espacio entre grupos de interacción Gemini */
+            margin-bottom: 1rem; 
         }
 
     </style>
@@ -349,95 +338,96 @@
         
         let currentLearningGodId = null;
 
+        // --- Datos de los Dioses con URLs de placeholder ---
         const godsData = [
             { 
                 id: "zeus", name: "Zeus", motto: "¡El cielo y el trueno me obedecen!",
                 description: "Soy Zeus, el más poderoso de todos los dioses y rey del Olimpo, la montaña donde vivimos. Controlo el cielo, las tormentas, los truenos y los relámpagos con mi poderoso rayo. Mi animal sagrado es el águila, que vuela alto como yo. Aunque soy justo, a veces tengo un carácter fuerte. ¡Todos los dioses y mortales me respetan!",
                 quizQuestion: "Soy el rey del Olimpo y lanzo rayos cuando me enfado. ¿Quién soy?",
-                imagePrompt: "Zeus, king of Greek gods, holding a small, non-threatening lightning bolt. Friendly and colorful cartoon illustration for a children's educational app. Smiling and approachable.",
-                symbolImagePrompt: "A bright yellow lightning bolt. Simple, clear, and colorful icon for a children's game. Clean lines and friendly appearance.",
+                image: "https://placehold.co/150x150/FFD700/000000?text=Zeus", 
+                symbolImage: "https://placehold.co/150x150/FFEB3B/000000?text=Rayo", 
                 hint: "Mi animal sagrado es el águila."
             },
             { 
                 id: "hera", name: "Hera", motto: "Reina del Olimpo, guardiana del hogar.",
                 description: "Soy Hera, la majestuosa reina de los dioses y esposa de Zeus (¡y también su hermana!). Protejo el matrimonio, a las mujeres y a las familias. Mi animal favorito es el pavo real, con su hermosa cola de mil ojos. A veces soy un poco celosa, ¡pero siempre defiendo lo que es importante para mí!",
                 quizQuestion: "Soy la esposa de Zeus y la diosa del matrimonio. Mi símbolo es el pavo real. ¿Quién soy?",
-                imagePrompt: "Hera, queen of Greek gods, wearing a simple diadem, with a small, cute peacock by her side. Friendly and colorful cartoon illustration for a children's educational app. Smiling and approachable.",
-                symbolImagePrompt: "A single, stylized peacock feather with vibrant colors. Simple, clear, and colorful icon for a children's game. Clean lines and friendly appearance.",
+                image: "https://placehold.co/150x150/87CEEB/000000?text=Hera", 
+                symbolImage: "https://placehold.co/150x150/32CD32/FFFFFF?text=Pavo+Real", 
                 hint: "Soy la reina de todos los dioses."
             },
             { 
                 id: "poseidon", name: "Poseidón", motto: "¡Las olas tiemblan ante mi tridente!",
                 description: "Soy Poseidón, hermano de Zeus y dios de todos los mares, océanos, ríos y también de los terremotos y los caballos. Con mi tridente mágico, puedo calmar las aguas o provocar olas gigantes y tormentas terribles. Los marineros me rezan para tener viajes seguros. ¡Me encantan los caballos y a veces me paseo en un carro tirado por ellos sobre las olas!",
                 quizQuestion: "Controlo los mares con mi tridente y soy hermano de Zeus. ¿Quién soy?",
-                imagePrompt: "Poseidon, Greek god of the sea, holding a small, friendly trident, with wavy blue hair. Friendly and colorful cartoon illustration for a children's educational app. Smiling and approachable.",
-                symbolImagePrompt: "A blue or golden trident. Simple, clear, and colorful icon for a children's game. Clean lines and friendly appearance.",
+                image: "https://placehold.co/150x150/1E90FF/FFFFFF?text=Poseidon", 
+                symbolImage: "https://placehold.co/150x150/4682B4/FFFFFF?text=Tridente", 
                 hint: "También soy el dios de los terremotos."
             },
             { 
                 id: "atenea", name: "Atenea", motto: "Sabiduría y estrategia, mi estandarte.",
                 description: "Soy Atenea, la diosa de la sabiduría, la inteligencia, las artes, la estrategia en la guerra y la justicia. ¡Nací de una forma muy especial: directamente de la cabeza de Zeus, ya adulta y con armadura! Soy muy astuta y ayudo a los héroes valientes y listos. Mi animal sagrado es el búho, que todo lo ve, y mi planta es el olivo. Siempre llevo mi lanza y mi escudo.",
                 quizQuestion: "Nací de la cabeza de Zeus y soy la diosa de la sabiduría. Un búho me acompaña. ¿Quién soy?",
-                imagePrompt: "Athena, Greek goddess of wisdom, wearing a simple helmet, with a small, wise-looking owl on her shoulder. Friendly and colorful cartoon illustration for a children's educational app. Smiling and approachable.",
-                symbolImagePrompt: "A small, wise-looking owl. Simple, clear, and colorful icon for a children's game. Clean lines and friendly appearance.",
+                image: "https://placehold.co/150x150/D3D3D3/000000?text=Atenea", 
+                symbolImage: "https://placehold.co/150x150/A9A9A9/FFFFFF?text=Lechuza", 
                 hint: "También soy diosa de la estrategia en la guerra."
             },
             { 
                 id: "apolo", name: "Apolo", motto: "Luz, música y arte, mi divina inspiración.",
                 description: "Soy Apolo, dios del sol, la luz, la música, la poesía, la medicina, las profecías y el arco. ¡Soy muy talentoso! Toco una lira dorada que encanta a todos y soy un arquero increíble. También puedo ver el futuro y curar a los enfermos. Mi hermana gemela es Artemisa. Cada día conduzco el carro del sol por el cielo.",
                 quizQuestion: "Soy el dios del sol y la música, y toco la lira. Mi hermana es Artemisa. ¿Quién soy?",
-                imagePrompt: "Apollo, Greek god of the sun and music, holding a small golden lyre, with subtle sun rays in the background. Friendly and colorful cartoon illustration for a children's educational app. Smiling and approachable.",
-                symbolImagePrompt: "A small golden lyre. Simple, clear, and colorful icon for a children's game. Clean lines and friendly appearance.",
+                image: "https://placehold.co/150x150/FFA500/000000?text=Apolo", 
+                symbolImage: "https://placehold.co/150x150/FFC107/000000?text=Lira", 
                 hint: "También soy dios de la profecía y la medicina."
             },
             { 
                 id: "afrodita", name: "Afrodita", motto: "La belleza y el amor florecen conmigo.",
                 description: "Soy Afrodita, la deslumbrante diosa del amor, la belleza, el placer y la fertilidad. ¡Dicen que soy la más bella de todas! Nací de la espuma del mar y llegué a la orilla en una concha. Mis animales sagrados son las palomas y los cisnes. Donde yo paso, las flores crecen y el amor surge.",
                 quizQuestion: "Soy la diosa de la belleza y el amor. Nací de la espuma del mar. ¿Quién soy?",
-                imagePrompt: "Aphrodite, Greek goddess of love, surrounded by a few gentle flowers, holding a small seashell. Friendly and colorful cartoon illustration for a children's educational app. Smiling and approachable.",
-                symbolImagePrompt: "A pink or pearlescent seashell. Simple, clear, and colorful icon for a children's game. Clean lines and friendly appearance.",
+                image: "https://placehold.co/150x150/FFC0CB/000000?text=Afrodita", 
+                symbolImage: "https://placehold.co/150x150/FFB6C1/000000?text=Concha", 
                 hint: "Mis animales son las palomas y los cisnes."
             },
             { 
                 id: "hermes", name: "Hermes", motto: "Veloz como el viento, mensajero divino.",
                 description: "Soy Hermes, el más rápido y astuto de los dioses. Soy el mensajero personal de Zeus, y también el dios de los viajeros, los comerciantes, los atletas ¡y hasta de los ladrones listos! Llevo sandalias con alas y un sombrero también alado que me hacen volar. Con mi bastón mágico, el caduceo, guío a las almas al inframundo.",
                 quizQuestion: "Soy el mensajero de los dioses y llevo sandalias con alas. ¿Quién soy?",
-                imagePrompt: "Hermes, Greek messenger god, wearing small winged sandals and a winged cap, holding a caduceus staff. Friendly and colorful cartoon illustration for a children's educational app. Smiling and approachable.",
-                symbolImagePrompt: "A single winged sandal. Simple, clear, and colorful icon for a children's game. Clean lines and friendly appearance.",
+                image: "https://placehold.co/150x150/ADD8E6/000000?text=Hermes", 
+                symbolImage: "https://placehold.co/150x150/B0E0E6/000000?text=Sandalias", 
                 hint: "También soy el dios de los comerciantes y viajeros."
             },
             { 
                 id: "ares", name: "Ares", motto: "¡La furia de la batalla corre por mis venas!",
                 description: "Soy Ares, el dios de la guerra, la violencia y el coraje. ¡Me encanta el ruido de las espadas y el fragor de la batalla! Siempre estoy listo para luchar, con mi casco brillante, mi escudo y mi lanza. Aunque a veces soy un poco impulsivo, represento la fuerza bruta y el espíritu guerrero.",
                 quizQuestion: "Soy el dios de la guerra y me encanta la batalla. Llevo casco y lanza. ¿Quién soy?",
-                imagePrompt: "Ares, Greek god of war, holding a small, toy-like sword and shield, looking brave but not aggressive. Friendly and colorful cartoon illustration for a children's educational app. Smiling and approachable.",
-                symbolImagePrompt: "A small, simple sword crossed with a round shield. Simple, clear, and colorful icon for a children's game. Clean lines and friendly appearance.",
+                image: "https://placehold.co/150x150/B22222/FFFFFF?text=Ares", 
+                symbolImage: "https://placehold.co/150x150/DC143C/FFFFFF?text=Lanza", 
                 hint: "Mi hermana Atenea también es diosa de la guerra, pero más estratégica."
             },
             {
                 id: "hades", name: "Hades", motto: "Señor del Inframundo, guardián de las almas.",
                 description: "Soy Hades, hermano de Zeus y Poseidón, y el rey del Inframundo, el reino de los muertos. Es un lugar oscuro y misterioso, pero yo soy un gobernante justo, no malvado. Mi perro guardián, Cerbero, tiene tres cabezas y vigila la entrada. También soy el dios de las riquezas que se encuentran bajo tierra, como los metales y las gemas preciosas. Llevo un casco que me hace invisible.",
                 quizQuestion: "Soy el rey del Inframundo y mi perro guardián tiene tres cabezas. ¿Quién soy?",
-                imagePrompt: "Hades, Greek god of the underworld, with a serious but not scary expression, a hint of a crown, and a small, non-frightening, three-headed dog (Cerberus) stylized cutely at his feet. Friendly and colorful cartoon illustration for a children's educational app.",
-                symbolImagePrompt: "A simple, dark grey or black two-pronged bident. Simple, clear, and colorful icon for a children's game. Clean lines and friendly appearance.",
+                image: "https://placehold.co/150x150/2F4F4F/FFFFFF?text=Hades", 
+                symbolImage: "https://placehold.co/150x150/696969/FFFFFF?text=Cancerbero", 
                 hint: "Soy hermano de Zeus y Poseidón."
             },
             {
                 id: "artemisa", name: "Artemisa", motto: "Cazadora indómita, protectora de la naturaleza.",
                 description: "Soy Artemisa, diosa de la caza, los bosques, los animales salvajes, la naturaleza y la luna. Soy la hermana gemela de Apolo. Me encanta correr libre por los montes con mi arco y flechas de plata, acompañada de mis ninfas y mis perros de caza. Protejo a los animales jóvenes y a las muchachas. ¡No me gusta que me molesten cuando estoy cazando!",
                 quizQuestion: "Soy la diosa de la caza y la luna, y hermana gemela de Apolo. Llevo arco y flechas. ¿Quién soy?",
-                imagePrompt: "Artemis, Greek goddess of the hunt, holding a small bow and arrow, with a small, cute deer nearby. Friendly and colorful cartoon illustration for a children's educational app. Smiling and approachable.",
-                symbolImagePrompt: "A small bow with an arrow. Simple, clear, and colorful icon for a children's game. Clean lines and friendly appearance.",
+                image: "https://placehold.co/150x150/90EE90/000000?text=Artemisa", 
+                symbolImage: "https://placehold.co/150x150/8FBC8F/000000?text=Arco", 
                 hint: "Me encanta la naturaleza y los animales salvajes."
             }
         ];
 
-        const modalImagePrompts = {
-            trophy: "A shiny golden trophy cup with stars around it. Bright, cheerful, and celebratory cartoon illustration for a children's game modal.",
-            wellDone: "A smiling gold medal with a red ribbon, and the text '¡Bien Hecho!' in a fun font. Bright, cheerful, and celebratory cartoon illustration for a children's game modal.",
-            champion: "A golden laurel wreath with a sparkling star in the center, and the text '¡Campeón!' in a fun, bold font. Bright, cheerful, and celebratory cartoon illustration for a children's game modal.",
-            thumbsUp: "A cute, friendly cartoon character giving a big thumbs up with a happy expression. Bright, cheerful, and celebratory cartoon illustration for a children's game modal.",
-            book: "An open magical book with colorful illustrations of stars and swirls coming out of its pages. Bright, cheerful, and celebratory cartoon illustration for a children's game modal."
+        const modalImagePlaceholders = { // Renombrado y usando placeholders
+            trophy: "https://placehold.co/150x150/BFDBFE/3B82F6?text=Trofeo",
+            wellDone: "https://placehold.co/150x150/32CD32/FFFFFF?text=Bien+Hecho",
+            champion: "https://placehold.co/150x150/FFD700/000000?text=Campeon",
+            thumbsUp: "https://placehold.co/150x150/32CD32/FFFFFF?text=Pulgar+Arriba",
+            book: "https://placehold.co/150x150/ADD8E6/000000?text=Libro"
         };
         
         let currentQuizQuestions = [];
@@ -483,85 +473,36 @@
             }
         }
 
-        // Rutas para las Netlify Functions (reemplazar con las URLs reales de las funciones desplegadas si es necesario)
-        const NETLIFY_FUNCTION_PATH_IMAGEN = "/.netlify/functions/imagen-generate";
+        // Ya no se usa para imágenes, solo para texto
         const NETLIFY_FUNCTION_PATH_GEMINI_TEXT = "/.netlify/functions/gemini-text";
-
-        async function generateImageAI(prompt, storageKey) { 
-            try {
-                const cachedImage = sessionStorage.getItem(storageKey);
-                if (cachedImage) {
-                    console.log(`[CACHE] Imagen encontrada en sessionStorage para ${storageKey}`);
-                    return cachedImage;
-                }
-            } catch (e) {
-                console.warn("Error leyendo de sessionStorage (cache):", e);
-            }
-
-            console.log(`[API CALL INIT VIA NETLIFY FN] Imagen para ${storageKey}. Prompt: ${prompt ? prompt.substring(0,70) : 'PROMPT_UNDEFINED'}...`);
-            const payload = { prompt: prompt }; 
-            
-            try {
-                const response = await fetch(NETLIFY_FUNCTION_PATH_IMAGEN, { // Llamada a la Netlify Function
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                console.log(`[DEBUG] Netlify Function (Imagen) Response Status para ${storageKey}:`, response.status);
-                if (!response.ok) {
-                    const errorBody = await response.text();
-                    let detailedErrorMessage = `Error de Netlify Function (Imagen) (${response.status}) para ${storageKey}: ${errorBody}`;
-                    if (response.status === 401 || response.status === 403 ) { // Manejar 401/403 desde la función Netlify
-                        detailedErrorMessage += " Problema de autorización/autenticación al llamar a la API de Google desde la función Netlify. Verifica las variables de entorno de la API Key en Netlify.";
-                    }
-                    console.error(detailedErrorMessage);
-                    throw new Error(`Error de Netlify Function (Imagen): ${response.status}`);
-                }
-                const result = await response.json(); // La función Netlify debe devolver el JSON de la API de Google
-                
-                if (result.predictions && result.predictions.length > 0 && result.predictions[0].bytesBase64Encoded) {
-                    const imageUrl = `data:image/png;base64,${result.predictions[0].bytesBase64Encoded}`;
-                    try {
-                        sessionStorage.setItem(storageKey, imageUrl); 
-                        console.log(`[CACHE] Imagen guardada en sessionStorage para ${storageKey}`);
-                    } catch (e) {
-                        console.warn(`Error guardando en sessionStorage para ${storageKey}:`, e);
-                    }
-                    return imageUrl;
-                } else if (result.error) { // Si la función Netlify devolvió un error estructurado
-                    console.error(`Error desde la función Netlify (Imagen) para ${storageKey}:`, result.error, result.details || '');
-                     throw new Error(result.error || "Error desconocido desde la función Netlify (Imagen).");
-                }else {
-                    console.error("Respuesta inesperada desde la función Netlify (Imagen):", result);
-                    throw new Error("No se pudo generar la imagen a través de la función Netlify.");
-                }
-            } catch (error) {
-                console.error(`Error generando imagen con IA (vía Netlify Function) para ${storageKey}:`, error);
-                return null;
-            }
-        }
 
         function createImageElement(src, alt, isLarge = false) { 
             const img = document.createElement('img');
             const fallbackSize = isLarge ? "150x150" : "80x80";
-            const fallbackText = isLarge ? "Error Imagen" : "Err";
+            const fallbackText = isLarge ? alt : (alt.substring(0,3) || "Img"); // Usa parte del alt o "Img"
+            
             img.src = src || `https://placehold.co/${fallbackSize}/E5E7EB/9CA3AF?text=${encodeURIComponent(fallbackText)}`;
             img.alt = alt;
-            img.className = `shadow-md`; 
-            if (src && src.startsWith("data:")) { img.classList.add('animated-image'); }
+            img.className = `shadow-md`; // El CSS se encarga de los tamaños específicos
+            
+            // No añadir 'animated-image' para placeholders estáticos
+            // Si luego usas GIFs animados reales, puedes añadir esta clase condicionalmente.
+            // if (src && !src.startsWith("https://placehold.co")) { img.classList.add('animated-image'); }
+
             img.onerror = () => { 
                 img.src = `https://placehold.co/${fallbackSize}/E5E7EB/9CA3AF?text=${encodeURIComponent("Fallo Carga")}`;
                 img.alt = `Error al cargar: ${alt}`;
-                img.classList.remove('animated-image');
             };
             return img;
         }
+        
+        // La función showLoadingIndicator ya no se usará para imágenes, pero se mantiene por si se usa para texto.
         function showLoadingIndicator(container, isLarge = false) { 
             container.innerHTML = '';
             const placeholder = document.createElement('div');
-            placeholder.className = 'image-placeholder'; 
+            placeholder.className = 'image-placeholder'; // Esta clase ahora solo será para el loader de texto de Gemini.
             const loader = document.createElement('div');
-            loader.className = 'image-loading-indicator';
+            loader.className = 'loading-indicator'; // Usar 'loading-indicator' para el spinner de texto
             placeholder.appendChild(loader);
             container.appendChild(placeholder);
         }
@@ -574,33 +515,31 @@
             if (sectionId === 'quiz-section') mainTitleHeader.textContent = "¡Adivina el Dios!";
         }
 
-        async function populateMainMenu() { 
+        function populateMainMenu() { 
             godsMenuGrid.innerHTML = '';
-            for (const god of godsData) {
+            godsData.forEach(god => {
                 const godButton = document.createElement('button');
                 godButton.className = 'god-menu-item-button focus:outline-none focus:ring-2 focus:ring-yellow-400';
                 const imgDisplayArea = document.createElement('div'); 
+                // Tamaño del div para la imagen del menú, para evitar saltos de layout
+                imgDisplayArea.style.width = '72px'; 
+                imgDisplayArea.style.height = '72px';
+                imgDisplayArea.style.display = 'flex';
+                imgDisplayArea.style.alignItems = 'center';
+                imgDisplayArea.style.justifyContent = 'center';
+
+                imgDisplayArea.appendChild(createImageElement(god.image, `[Imagen de ${god.name}]`));
+                
                 const nameSpan = document.createElement('span');
                 nameSpan.textContent = god.name;
                 godButton.appendChild(imgDisplayArea); 
                 godButton.appendChild(nameSpan);
                 godButton.onclick = () => { playSound('click', "C4", "8n"); displayLearnGod(god.id); };
                 godsMenuGrid.appendChild(godButton);
-                
-                showLoadingIndicator(imgDisplayArea, false); 
-                const storageKey = `app_img_${god.id}_main`;
-                try {
-                    const imageUrl = await generateImageAI(god.imagePrompt, storageKey);
-                    imgDisplayArea.innerHTML = ''; 
-                    imgDisplayArea.appendChild(createImageElement(imageUrl, `[Imagen de ${god.name}]`));
-                } catch (e) {
-                    imgDisplayArea.innerHTML = ''; 
-                    imgDisplayArea.appendChild(createImageElement(null, `[Error al cargar ${god.name}]`));
-                }
-            }
+            });
         }
 
-        async function displayLearnGod(godId) {
+        function displayLearnGod(godId) {
             const god = godsData.find(g => g.id === godId);
             if (!god) return;
             currentLearningGodId = god.id;
@@ -617,16 +556,9 @@
             getAdviceButtonText.textContent = `Pide Consejo a ${god.name}`;
             generateMythButtonText.textContent = `Descubre un Mito de ${god.name}`;
             
-            showLoadingIndicator(godLearnImageContainer, true); 
-            const storageKey = `app_img_${god.id}_main`; 
-            try {
-                const imageUrl = await generateImageAI(god.imagePrompt, storageKey);
-                godLearnImageContainer.innerHTML = '';
-                godLearnImageContainer.appendChild(createImageElement(imageUrl, `[Imagen de ${god.name}]`, true));
-            } catch (e) {
-                 godLearnImageContainer.innerHTML = '';
-                 godLearnImageContainer.appendChild(createImageElement(null, `[Error al cargar ${god.name}]`, true));
-            }
+            godLearnImageContainer.innerHTML = '';
+            godLearnImageContainer.appendChild(createImageElement(god.image, `[Imagen de ${god.name}]`, true));
+            
             showSection('learning-section');
             playSound('navigation', "E5", "16n");
         }
@@ -675,27 +607,19 @@
             }
         }
         
-        async function displayQuizQuestion() { 
+        function displayQuizQuestion() { 
             if (currentQuizQuestionIndex < currentQuizQuestions.length) {
                 const currentQuestion = currentQuizQuestions[currentQuizQuestionIndex];
                 questionTextElement.textContent = currentQuestion.text;
                 const godForSymbol = godsData.find(g => g.id === currentQuestion.godId);
                 
-                showLoadingIndicator(quizImageContainer, true); 
+                quizImageContainer.innerHTML = '';
                 if (godForSymbol) {
-                    const storageKeySymbol = `app_img_${godForSymbol.id}_symbol`;
-                    try {
-                        const symbolUrl = await generateImageAI(godForSymbol.symbolImagePrompt, storageKeySymbol);
-                        quizImageContainer.innerHTML = '';
-                        quizImageContainer.appendChild(createImageElement(symbolUrl, `[Símbolo de ${currentQuestion.answer}]`, true));
-                    } catch (e) {
-                        quizImageContainer.innerHTML = '';
-                        quizImageContainer.appendChild(createImageElement(null, `[Error al cargar símbolo de ${currentQuestion.answer}]`, true));
-                    }
+                    quizImageContainer.appendChild(createImageElement(godForSymbol.symbolImage, `[Símbolo de ${currentQuestion.answer}]`, true));
                 } else {
-                     quizImageContainer.innerHTML = '';
                      quizImageContainer.appendChild(createImageElement(null, `[Símbolo no encontrado]`, true));
                 }
+
                 optionsAreaElement.innerHTML = '';
                 currentQuestion.options.forEach(option => {
                     const button = document.createElement('button');
@@ -758,7 +682,7 @@
             nextQuestionButton.style.display = 'none';
         }
 
-        async function endGame() { 
+        function endGame() { 
             playSound('gameEvent', "G4", "2n");
             modalScoreText.textContent = `Tu puntaje: ${currentScore} de ${currentQuizQuestions.length}`;
             let message = "";
@@ -772,7 +696,7 @@
                 modalTitle.textContent = "¡Excelente!";
                 imageKey = "champion";
             } else if (currentScore >= currentQuizQuestions.length / 2) {
-                message = "¡Muy bien hecho! Sabes mucho sobre los Dioses. 👍";
+                message = "¡Muy bien hecho! Sabes mucho sobre los Dioses. �";
                 modalTitle.textContent = "¡Buen Trabajo!";
                 imageKey = "wellDone";
             } else {
@@ -781,16 +705,10 @@
                 imageKey = "book";
             }
             modalMessageText.textContent = message;
-            showLoadingIndicator(modalImageContainer, true); 
-            const storageKeyModal = `app_img_modal_${imageKey}`;
-            try {
-                const imageUrl = await generateImageAI(modalImagePrompts[imageKey], storageKeyModal);
-                modalImageContainer.innerHTML = '';
-                modalImageContainer.appendChild(createImageElement(imageUrl, `[${imageKey}]`, true));
-            } catch (e) {
-                modalImageContainer.innerHTML = '';
-                modalImageContainer.appendChild(createImageElement(null, `[Error al cargar imagen de modal]`, true));
-            }
+            
+            modalImageContainer.innerHTML = '';
+            modalImageContainer.appendChild(createImageElement(modalImagePlaceholders[imageKey], `[${imageKey}]`, true));
+            
             endGameModal.style.display = 'flex';
         }
         
@@ -800,10 +718,10 @@
             if(modalTitleElement && modalTitleText) modalTitleElement.textContent = modalTitleText;
             playSound('gemini', "C4", "2n");
             
-            const payload = { prompt: prompt }; // Payload para la Netlify Function de texto
+            const payload = { prompt: prompt }; 
             
             try {
-                const response = await fetch(NETLIFY_FUNCTION_PATH_GEMINI_TEXT, { // Llamada a la Netlify Function
+                const response = await fetch(NETLIFY_FUNCTION_PATH_GEMINI_TEXT, { 
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
@@ -811,10 +729,14 @@
                  console.log(`[DEBUG] Netlify Function (Texto) Response Status:`, response.status);
                 if (!response.ok) {
                      const errorBody = await response.text();
-                     console.error(`Error de Netlify Function (Texto) (${response.status}): ${errorBody}`);
+                     let detailedErrorMessage = `Error de Netlify Function (Texto) (${response.status}): ${errorBody}`;
+                     if (response.status === 401 || response.status === 403) {
+                        detailedErrorMessage += " Problema de autenticación/autorización con la API de Gemini desde la función Netlify. Verifica la variable de entorno GOOGLE_GEMINI_API_KEY en Netlify y los permisos de la clave API.";
+                     }
+                     console.error(detailedErrorMessage);
                      throw new Error(`Error de Netlify Function (Texto): ${response.status}`);
                 }
-                const result = await response.json(); // La función Netlify debe devolver el JSON de la API de Google
+                const result = await response.json(); 
 
                 if (result.candidates && result.candidates.length > 0 &&
                     result.candidates[0].content && result.candidates[0].content.parts &&
@@ -828,7 +750,8 @@
                     playSound('incorrect', "A2", "1n");
                 }
                 else {
-                    responseElement.textContent = "Parece que las Musas no están inspiradas hoy. Intenta de nuevo.";
+                    console.error("Respuesta inesperada desde la función Netlify (Texto):", result);
+                    responseElement.textContent = "Parece que las Musas no están inspiradas hoy (respuesta inesperada). Intenta de nuevo.";
                     playSound('incorrect', "A2", "1n");
                 }
             } catch (error) {
@@ -910,3 +833,88 @@
     </script>
 </body>
 </html>
+```
+
+Ahora, el código para la función `imagen-generate.js` (que irá en tu carpeta `netlify/functions/imagen-generate.js`). **Como hemos decidido usar imágenes estáticas, esta función ya no es estrictamente necesaria para el HTML anterior. Sin embargo, si en el futuro quisieras reintentar la generación de imágenes con IA (quizás después de resolver el tema de facturación de Google Cloud), esta función sería la base.** Por ahora, el HTML no la llamará.
+
+```javascript
+// netlify/functions/imagen-generate.js
+// NOTA: El HTML actual ya no llama a esta función, ya que usa imágenes estáticas.
+// Este código se proporciona por si quieres reactivar la generación de imágenes por IA en el futuro.
+
+exports.handler = async function(event, context) {
+    if (event.httpMethod !== 'POST') {
+        return {
+            statusCode: 405,
+            body: JSON.stringify({ error: 'Method Not Allowed' }),
+            headers: { 'Content-Type': 'application/json' },
+        };
+    }
+
+    try {
+        const { prompt } = JSON.parse(event.body);
+
+        if (!prompt) {
+            return {
+                statusCode: 400,
+                body: JSON.stringify({ error: 'El "prompt" es requerido.' }),
+                headers: { 'Content-Type': 'application/json' },
+            };
+        }
+
+        const apiKey = process.env.GOOGLE_IMAGEN_API_KEY; 
+        if (!apiKey) {
+            console.error("FATAL ERROR: La variable de entorno GOOGLE_IMAGEN_API_KEY no está configurada en Netlify.");
+            return {
+                statusCode: 500,
+                body: JSON.stringify({ error: 'Error de configuración del servidor: Clave de API de Imagen no encontrada en el entorno de la función.' }),
+                headers: { 'Content-Type': 'application/json' },
+            };
+        } else {
+            console.log("[Netlify Fn imagen-generate] GOOGLE_IMAGEN_API_KEY encontrada. Longitud:", apiKey.length);
+        }
+        
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`;
+        
+        const payload = {
+            instances: [{ prompt: prompt }],
+            parameters: { sampleCount: 1 } 
+        };
+
+        console.log(`[Netlify Fn imagen-generate] Iniciando llamada a Google Imagen API. Prompt (inicio): ${prompt.substring(0, 50)}...`);
+
+        const apiResponse = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+        });
+
+        const responseData = await apiResponse.json(); 
+
+        if (!apiResponse.ok) {
+            console.error(`[Netlify Fn imagen-generate] Error desde Google Imagen API (${apiResponse.status}):`, JSON.stringify(responseData, null, 2));
+            const errorDetail = responseData && responseData.error && responseData.error.message ? responseData.error.message : `Error de API ${apiResponse.status}`;
+            return {
+                statusCode: apiResponse.status, 
+                body: JSON.stringify({ error: "Error al generar la imagen desde Google", details: errorDetail, googleResponse: responseData }),
+                headers: { 'Content-Type': 'application/json' },
+            };
+        }
+        
+        console.log("[Netlify Fn imagen-generate] Imagen generada exitosamente por Google.");
+        return {
+            statusCode: 200,
+            body: JSON.stringify(responseData), 
+            headers: { 'Content-Type': 'application/json' },
+        };
+
+    } catch (error) {
+        console.error('[Netlify Fn imagen-generate] Error interno en la función:', error.toString(), error.stack);
+        return {
+            statusCode: 500,
+            body: JSON.stringify({ error: 'Error interno del servidor en la función de imagen.', details: error.message }),
+            headers: { 'Content-Type': 'application/json' },
+        };
+    }
+};
+�
