@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dioses Griegos: Interactivo </title>
+    <title>Dioses Griegos: Panteón Completo y Quiz Extendido</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Chewy&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
@@ -150,6 +150,9 @@
             <button id="go-to-quiz-selection-button" class="action-button w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg text-xl sm:text-2xl shadow-xl">
                 ¡Ir al Quiz!
             </button>
+             <button id="ask-olympus-button" class="action-button w-full bg-purple-500 hover:bg-purple-600 text-white font-bold py-3 px-6 rounded-lg text-xl sm:text-2xl shadow-xl mt-4">
+                Pregúntale al Olimpo ✨
+            </button>
         </section>
 
         <section id="learning-section" class="card-section">
@@ -262,6 +265,23 @@
                 <button id="close-myth-modal-button" class="gemini-modal-button bg-sky-500 hover:bg-sky-600 text-white">¡Genial!</button>
             </div>
         </div>
+
+        <div id="askOlympusModal" class="gemini-modal">
+            <div class="gemini-modal-content">
+                <h2 id="ask-olympus-modal-title" class="font-chewy title-section text-indigo-600 mb-3">Pregúntale al Olimpo... ✨</h2>
+                <input type="text" id="olympus-question-input" placeholder="Escribe tu pregunta general aquí..." class="w-full p-2.5 border border-sky-300 rounded-md text-base shadow-sm focus:ring-2 focus:ring-purple-400 focus:border-purple-400 mb-3">
+                <button id="send-olympus-question-button" class="gemini-button w-full bg-purple-500 hover:bg-purple-600 text-white">
+                    Enviar al Olimpo
+                    <span id="olympus-question-loading" style="display:none;" class="loading-indicator"></span>
+                </button>
+                <div id="olympus-response-area" class="mt-4 text-left" style="display:none;">
+                    <h3 id="olympus-responder-name" class="font-chewy text-xl text-purple-700"></h3>
+                    <p id="olympus-response-text" class="text-base"></p>
+                </div>
+                <button id="close-ask-olympus-modal-button" class="modal-button bg-gray-400 hover:bg-gray-500 text-white mt-4">Cerrar</button>
+            </div>
+        </div>
+
     </div>
 
     <script>
@@ -269,6 +289,7 @@
         const mainMenuSection = document.getElementById('main-menu-section');
         const godsMenuGrid = document.getElementById('gods-menu-grid');
         const goToQuizSelectionButton = document.getElementById('go-to-quiz-selection-button');
+        const askOlympusButton = document.getElementById('ask-olympus-button'); // Nuevo botón
         
         const learningSection = document.getElementById('learning-section');
         const godLearnNameElement = document.getElementById('god-learn-name');
@@ -296,7 +317,7 @@
         const quitQuizButton = document.getElementById('quit-quiz-button');
         
         const endGameModal = document.getElementById('endGameModal');
-        const modalTitle = document.getElementById('modal-title');
+        const modalEndGameTitle = document.getElementById('modal-title'); // Renombrado para evitar conflicto
         const modalScoreText = document.getElementById('modal-score');
         const modalMessageText = document.getElementById('modal-message');
         const modalImageContainer = document.getElementById('modal-image-container');
@@ -335,6 +356,17 @@
         const geminiMythModalTitle = document.getElementById('gemini-myth-modal-title'); 
         const geminiMythResponse = document.getElementById('gemini-myth-response');
         const closeMythModalButton = document.getElementById('close-myth-modal-button');
+
+        // Elementos para "Preguntar al Olimpo"
+        const askOlympusModal = document.getElementById('askOlympusModal');
+        const askOlympusModalTitle = document.getElementById('ask-olympus-modal-title');
+        const olympusQuestionInput = document.getElementById('olympus-question-input');
+        const sendOlympusQuestionButton = document.getElementById('send-olympus-question-button');
+        const olympusQuestionLoading = document.getElementById('olympus-question-loading');
+        const olympusResponseArea = document.getElementById('olympus-response-area');
+        const olympusResponderName = document.getElementById('olympus-responder-name');
+        const olympusResponseText = document.getElementById('olympus-response-text');
+        const closeAskOlympusModalButton = document.getElementById('close-ask-olympus-modal-button');
         
         let currentLearningGodId = null;
 
@@ -451,6 +483,51 @@
                 ],
                 image: "img/Artemisa.png", 
                 symbolImage: "icon/arco_artemisa.png", 
+            },
+            // --- NUEVOS DIOSES AÑADIDOS ---
+            { 
+                id: "demeter", name: "Deméter", motto: "De mí brota la vida, ¡la tierra os alimenta!",
+                description: "Soy Deméter, la generosa diosa de la agricultura, las cosechas, la fertilidad de la tierra y las estaciones del año. Soy hermana de Zeus. Gracias a mí, los campos se llenan de trigo, las frutas maduran y tenéis alimento. Cuando mi amada hija Perséfone fue raptada por Hades y llevada al Inframundo, mi tristeza fue tan grande que la tierra se volvió fría y estéril, ¡así nació el invierno! Ahora, Perséfone pasa parte del año conmigo (primavera y verano) y parte con Hades (otoño e invierno), y así es como cambian las estaciones. Mis símbolos son la espiga de trigo, la hoz y la amapola. En Roma me conocen como Ceres.",
+                quizQuestions: [
+                    { godId:"demeter", text: "¿Qué fenómeno natural explican mi tristeza y alegría por mi hija Perséfone?", options: ["Las mareas", "Los eclipses", "Las estaciones del año", "Los arcoíris"], answer: "Las estaciones del año", hint: "Tiene que ver con el verano y el invierno." },
+                    { godId:"demeter", text: "Soy la diosa de la agricultura. ¿Cuál es mi nombre romano?", options: ["Flora", "Ceres", "Pomona", "Tellus"], answer: "Ceres", hint: "De mi nombre romano viene la palabra 'cereal'." },
+                    { godId:"demeter", text: "¿Qué planta, símbolo de la cosecha, me representa a menudo?", options: ["La vid", "El olivo", "La espiga de trigo", "El laurel"], answer: "La espiga de trigo", hint: "Es dorada y se usa para hacer pan." }
+                ],
+                image: "img/Demeter.png", // Asegúrate de tener esta imagen
+                symbolImage: "icon/espiga_demeter.png", // Asegúrate de tener este icono
+            },
+            { 
+                id: "hefesto", name: "Hefesto", motto: "¡Con fuego y metal, creo maravillas!",
+                description: "Soy Hefesto, el dios del fuego, los volcanes, la metalurgia, la herrería y la artesanía. Soy hijo de Zeus y Hera (o a veces solo de Hera). Aunque soy cojo (me caí del Olimpo cuando era pequeño), soy un artesano increíblemente hábil. En mi taller, bajo los volcanes, fabrico armas poderosas para los dioses, como los rayos de Zeus, el tridente de Poseidón y la armadura de Aquiles. También creé a Pandora, la primera mujer mortal. Mis símbolos son el martillo, el yunque, las tenazas y, por supuesto, el fuego. Estoy casado con la bella Afrodita, ¡aunque ella no siempre me es fiel! Los romanos me conocen como Vulcano.",
+                quizQuestions: [
+                    { godId:"hefesto", text: "Soy el dios herrero del Olimpo. ¿Cuál es mi nombre romano?", options: ["Marte", "Mercurio", "Vulcano", "Jano"], answer: "Vulcano", hint: "Está relacionado con las montañas que escupen fuego." },
+                    { godId:"hefesto", text: "¿Qué herramientas son mis símbolos más conocidos como dios de la forja?", options: ["Arco y flecha", "Lira y plectro", "Martillo y yunque", "Tridente y red"], answer: "Martillo y yunque", hint: "Los uso para golpear y dar forma al metal." },
+                    { godId:"hefesto", text: "A pesar de ser el dios de la artesanía, tengo una característica física distintiva. ¿Cuál es?", options: ["Soy ciego", "Soy cojo", "Soy mudo", "Tengo un solo ojo"], answer: "Soy cojo", hint: "Me caí del Olimpo." }
+                ],
+                image: "img/Hefesto.png", // Asegúrate de tener esta imagen
+                symbolImage: "icon/martillo_hefesto.png", // Asegúrate de tener este icono
+            },
+            { 
+                id: "dionisio", name: "Dionisio", motto: "¡Alegría, vino y celebración sin fin!",
+                description: "Soy Dionisio, el alegre dios del vino, la vendimia (la cosecha de uvas), la fertilidad, el éxtasis, la locura ritual y el teatro. Soy hijo de Zeus y la mortal Sémele. Viajo por el mundo enseñando a los humanos cómo cultivar la vid y hacer vino. Mis fiestas, llamadas Dionisias o Bacanales, son famosas por su alegría desenfrenada, música y danza. A menudo me acompañan las Ménades (mis seguidoras salvajes) y los Sátiros (criaturas mitad hombre, mitad cabra). Mis símbolos son la vid, la copa de vino (kántharos), la hiedra y el tirso (un bastón con una piña en la punta envuelto en hiedra). En Roma me conocen como Baco. A veces ocupo un lugar entre los Doce Olímpicos en lugar de Hestia.",
+                quizQuestions: [
+                    { godId:"dionisio", text: "Soy el dios del vino y las fiestas. ¿Cuál es mi nombre romano?", options: ["Liber", "Baco", "Silvano", "Fauno"], answer: "Baco", hint: "Mis fiestas romanas se llamaban Bacanales." },
+                    { godId:"dionisio", text: "¿Qué planta trepadora, cuyas hojas a menudo me adornan, es uno de mis símbolos?", options: ["El roble", "El olivo", "La hiedra", "El laurel"], answer: "La hiedra", hint: "Es una planta siempre verde." },
+                    { godId:"dionisio", text: "¿Qué tipo de criaturas, mitad hombre y mitad cabra, suelen formar parte de mi séquito?", options: ["Centauros", "Cíclopes", "Sátiros", "Grifos"], answer: "Sátiros", hint: "Les gusta la música y la diversión." }
+                ],
+                image: "img/Dionisio.png", // Asegúrate de tener esta imagen
+                symbolImage: "icon/uva_dionisio.png", // Asegúrate de tener este icono
+            },
+            { 
+                id: "hestia", name: "Hestia", motto: "El calor del hogar, la paz de la familia.",
+                description: "Soy Hestia, la diosa virgen del hogar, la familia, el fuego del hogar y el orden doméstico. Soy la hermana mayor de Zeus, Poseidón, Hades, Hera y Deméter. Soy una diosa muy pacífica y amable, y represento la seguridad y la calidez del hogar. El fuego en el centro de cada casa y templo griego era sagrado para mí. Aunque soy una de las diosas olímpicas más importantes, a menudo cedo mi lugar en el consejo de los doce a Dionisio porque prefiero la tranquilidad y no me gustan las disputas de los otros dioses. No tengo muchos mitos propios porque mi presencia es constante y serena. Mi equivalente romana es Vesta, y sus sacerdotisas, las Vestales, eran muy importantes en Roma.",
+                quizQuestions: [
+                    { godId:"hestia", text: "Soy la diosa del hogar y la familia. ¿Cuál es mi nombre romano?", options: ["Juno", "Ceres", "Vesta", "Minerva"], answer: "Vesta", hint: "Mis sacerdotisas en Roma eran muy importantes y cuidaban un fuego sagrado." },
+                    { godId:"hestia", text: "¿Qué elemento esencial en cada hogar es mi símbolo principal?", options: ["El agua", "El aire", "La tierra", "El fuego"], answer: "El fuego", hint: "Proporciona calor y permite cocinar." },
+                    { godId:"hestia", text: "A menudo cedo mi lugar en el Olimpo a otro dios para mantener la paz. ¿A quién?", options: ["Ares", "Hermes", "Dionisio", "Hefesto"], answer: "Dionisio", hint: "Es el dios del vino y las fiestas." }
+                ],
+                image: "img/Hestia.png", // Asegúrate de tener esta imagen
+                symbolImage: "icon/fuego_hestia.png", // Asegúrate de tener este icono
             }
         ];
 
@@ -459,7 +536,6 @@
             wellDone: "icon/bien_hecho.png",
             champion: "icon/campeon.png",
             book: "icon/sigue_aprendiendo.png"
-            // 'thumbsUp' no se usa actualmente en la lógica de endGame, pero si se quisiera, se añadiría aquí.
         };
         
         let currentQuizQuestions = [];
@@ -538,7 +614,7 @@
         }
 
         function showSection(sectionId) { 
-            [mainMenuSection, learningSection, quizGodSelectionSection, quizSection].forEach(sec => sec.style.display = 'none');
+            [mainMenuSection, learningSection, quizGodSelectionSection, quizSection, askOlympusModal].forEach(sec => sec.style.display = 'none');
             document.getElementById(sectionId).style.display = 'block';
             if (sectionId === 'main-menu-section') mainTitleHeader.textContent = "Dioses del Olimpo";
             if (sectionId === 'quiz-god-selection-section') mainTitleHeader.textContent = "Elige Dioses para el Quiz";
@@ -618,7 +694,7 @@
             sourceGodsData.forEach(god => {
                 if (god.quizQuestions && god.quizQuestions.length > 0) {
                     god.quizQuestions.forEach(q => {
-                        const questionToAdd = {...q, godId: god.id }; // Añadir godId a cada pregunta para referencia del símbolo
+                        const questionToAdd = {...q, godId: god.id }; 
                         questionToAdd.options = [...q.options]; 
                         shuffleArray(questionToAdd.options);
                         currentQuizQuestions.push(questionToAdd);
@@ -715,25 +791,25 @@
             let imageKey = "trophy"; 
             if (currentQuizQuestions.length === 0) {
                  message = "No se generaron preguntas. ¡Intenta seleccionar algunos dioses!";
-                 modalTitle.textContent = "¡Oh Vaya!";
+                 modalEndGameTitle.textContent = "¡Oh Vaya!"; // Usar el ID correcto del título del modal
                  imageKey = "book"; 
             } else if (currentScore === currentQuizQuestions.length) {
                 message = "¡Felicidades! ¡Eres un experto en Dioses Griegos! 🏆";
-                modalTitle.textContent = "¡Excelente!";
+                modalEndGameTitle.textContent = "¡Excelente!";
                 imageKey = "champion";
             } else if (currentScore >= currentQuizQuestions.length / 2) {
                 message = "¡Muy bien hecho! Sabes mucho sobre los Dioses. 👍";
-                modalTitle.textContent = "¡Buen Trabajo!";
+                modalEndGameTitle.textContent = "¡Buen Trabajo!";
                 imageKey = "wellDone";
             } else {
                 message = "¡Sigue aprendiendo! Los Dioses Griegos son fascinantes. 😊";
-                modalTitle.textContent = "¡No te rindas!";
+                modalEndGameTitle.textContent = "¡No te rindas!";
                 imageKey = "book";
             }
             modalMessageText.textContent = message;
             
             modalImageContainer.innerHTML = '';
-            modalImageContainer.appendChild(createImageElement(modalImagePlaceholders[imageKey], `[${imageKey}]`, true));
+            modalImageContainer.appendChild(createImageElement(modalImagePlaceholders[imageKey] || `icon/${imageKey}.png`, `[${imageKey}]`, true));
             
             endGameModal.style.display = 'flex';
         }
@@ -823,6 +899,40 @@
             const prompt = `Crea un mini-mito o una historia muy corta (3-5 frases) para un niño de 9 años sobre el dios griego ${god.name}. La historia debe ser simple, emocionante y destacar una característica importante del dios. No menciones que eres un modelo de lenguaje o una IA.`;
             callGeminiAPI(prompt, mythLoading, geminiMythResponse, geminiMythModal, geminiMythModalTitle, modalTitleText);
         });
+        
+        // Funcionalidad "Preguntar al Olimpo"
+        askOlympusButton.addEventListener('click', () => {
+            playSound('click', "F4", "8n");
+            olympusQuestionInput.value = '';
+            olympusResponseArea.style.display = 'none';
+            olympusResponseText.textContent = '';
+            olympusResponderName.textContent = '';
+            askOlympusModal.style.display = 'flex';
+        });
+
+        sendOlympusQuestionButton.addEventListener('click', () => {
+            const userQuestion = olympusQuestionInput.value.trim();
+            if (!userQuestion) {
+                alert("Por favor, escribe tu pregunta para el Olimpo.");
+                return;
+            }
+            if (godsData.length === 0) return;
+
+            const randomIndex = Math.floor(Math.random() * godsData.length);
+            const randomGod = godsData[randomIndex];
+
+            olympusResponderName.textContent = `${randomGod.name} responde desde el Olimpo:`;
+            olympusResponseArea.style.display = 'block';
+            
+            const prompt = `Eres ${randomGod.name}, un dios/diosa del Olimpo. Tu lema es "${randomGod.motto}". Un niño curioso de 9 años le hace una pregunta general al Olimpo: '${userQuestion}'. Te ha tocado responder. Responde en primera persona, como si fueras ${randomGod.name}, de manera sencilla, amigable, sabia y un poco misteriosa, en aproximadamente 2-4 frases. Basa tu respuesta en tu personalidad y poderes descritos como: '${randomGod.description}'. No digas que eres un modelo de lenguaje o una IA, solo actúa como ${randomGod.name}. Mantén el lenguaje apropiado para un niño.`;
+            callGeminiAPI(prompt, olympusQuestionLoading, olympusResponseText, null, null, null); // No se abre otro modal, la respuesta va al modal 'askOlympusModal'
+        });
+        
+        closeAskOlympusModalButton.addEventListener('click', () => {
+            askOlympusModal.style.display = 'none';
+            playSound('click', "C3", "8n");
+        });
+
 
         closeChatModalButton.addEventListener('click', () => { geminiChatModal.style.display = 'none'; playSound('click', "C3", "8n"); });
         closeAdviceModalButton.addEventListener('click', () => { geminiAdviceModal.style.display = 'none'; playSound('click', "C3", "8n"); });
