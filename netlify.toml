@@ -1,0 +1,15 @@
+# netlify.toml
+
+# Configuración para las Netlify Functions
+[functions]
+  # Directorio donde Netlify buscará tus funciones serverless.
+  # Asegúrate de que coincida con la estructura de tu proyecto.
+  # Si creaste la carpeta como "netlify/functions/", esta es la configuración correcta.
+  directory = "netlify/functions/"
+
+# Configuración de construcción para tu sitio.
+# Para un sitio HTML simple que no necesita un paso de compilación,
+# y donde tu index.html está en la raíz del repositorio.
+[build]
+  publish = "." # Directorio a publicar (la raíz en este caso).
+  command = "echo 'No build command required for static HTML site'" # Comando de construcción (opcional, indica que no hay un paso de build complejo).
